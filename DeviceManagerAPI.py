@@ -1,0 +1,90 @@
+# -*- coding: utf-8 -*-
+
+import os
+import sqlite3
+import comandos
+import subprocess as sp
+
+class Android():
+	
+	def __init__(self, nome, console, vnc, rede):
+		self._nome = nome
+		self._console = console
+		self._vnc = vnc
+		self._rede = rede
+
+	def getNome(self):
+		return self._nome
+
+	def getConsole(self):
+		return self._console
+
+	def getVNC(self):
+		return self._vnc
+
+	def getRede(self):
+		return self._rede
+
+	# def connect(self):
+	# 	print(comandos.CONNECT)
+	# 	connect = sp.getoutput(comandos.CONNECT % self.getIP())
+	# 	print('{} {}'.format(connect, self.getIP()))
+
+	def start_app(self, activity, ip_cloudlet):
+		console = self.getConsole()
+		os.system(comandos.ACTIVITY % (console, activity))
+		os.system(comandos.SET_CLOUDLET % (console, activity, ip_cloudlet))
+
+	def exec_run(self, activity, ip_cloudlet, argumentos):
+		os.system(comandos.EXEC % (self.getConsole(), activity, ip_cloudlet, argumentos))
+
+	def getResults(self):
+		os.system(comandos.RESULTS % (self.getConsole(), self.getNome()))
+
+class DeviceManager():
+
+	def __init__(self, nome_cenario, ip_cloudlet):
+		self.nome_cenario = nome_cenario
+		self.ip_cloudlet = ip_cloudlet
+
+	def getDevices(self):
+		# conexão com a database
+		conn = sqlite3.connect('mydb.db')
+		cur = conn.cursor()
+
+		self.devices = []
+
+		# seleção dos dispositivos que fazem parte do cenário e estão ativos
+		cur.execute('SELECT * FROM containers WHERE nome_cenario = :nome AND estado_container = :estado AND is_server = 0',
+					{ 'nome': self.nome_cenario, 'estado': 'EXECUTANDO' }
+				)
+		res = cur.fetchall()
+
+		for i in range(len(res)):
+			# 0 -> nome_cenario; 1 -> nome_container; 2 -> porta_6080; 3 -> porta do adb 5 -> rede; 6 -> estado
+
+			console = res[i][3]
+			vnc = 'localhost:%s' % str(res[i][2])
+
+			# criação do objeto android
+			android = Android(res[i][1], console, vnc, res[i][6])
+
+			# lista com os dipositivos
+			self.devices.append(android)
+
+		# encerra a conexão
+		conn.close()
+
+		# retorna a lista com objetos
+		return self.devices
+
+	def start_app(self, android, activity):
+		# iniciar o app e definir a cloudlet
+		# exemplo: voce faz um for na lista de dispositivos e executa o metodo start_app para cada dispositivo na lista
+		# for device in api.getDevices(cenario):
+		# 	api.start_app(device, activity, argumentos)
+		
+		android.start_app(activity, self.ip_cloudlet)
+
+	def exec_activity(self, android, activity, argumentos):
+		android.exec_run(activity, self.ip_cloudlet, argumentos)
