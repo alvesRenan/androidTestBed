@@ -1,10 +1,10 @@
 ##### COMANDOS PARA O ADB #####
 
 # Inicia o ADB
-ADB_START = "adb start-server"
+ADB_START = "adb devices"
 
 # Mata o processo do ADB
-ADB_KILL = "adb devices"
+ADB_KILL = "adb kill-server"
 
 # Lista com os dispositivos conectados
 # saida exemplo:
