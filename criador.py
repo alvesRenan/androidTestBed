@@ -9,7 +9,7 @@ class Criador():
 	def __init__(self):
 		self.gerente = Gerente()
 		# conexão com o docker, utilize o comando 'docker version' e descubra a versão da API do servidor
-		self.client = docker.from_env(version='1.24')
+		self.client = docker.from_env(version='1.26')
 		# conexao com o sqlite
 		self.conn = sqlite3.connect('mydb.db')
 		# criacao do cursor

@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import time
 
 # importa a API
@@ -14,20 +16,6 @@ for android in dispositivos:
 	DM.start_app(android, "br.ufc.great.matrixoperation/.MainActivity")
 	time.sleep(5)
 
-# execucao de um exeprimento 30 vezes
-cont = 0
-while cont < 30:
-	print("\n Iniciando o teste numero {}".format(cont))
-
-	# para todos os dispositivos da lista
-	for android in dispositivos:
-		# executa o metodo da API passando o dispositivo, a activity e os extras
-		DM.exec_activity(android, "br.ufc.great.matrixoperation/.MainActivity", "--es 'operation' 'mul' --ei 'size' 500")
-
-	time.sleep(10)
-
-	cont += 1
-
-# coleta resultados
+# define a qtd de repeticoes, a activity e os argumentos a serem executados
 for android in dispositivos:
-	android.getResults()
+	DM.exec_activity(android, "br.ufc.great.matrixoperation/.MainActivity", "--es 'operation' 'mul' --ei 'size' 500", 5)

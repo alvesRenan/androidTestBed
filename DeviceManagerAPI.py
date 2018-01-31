@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import time
+import random
 import sqlite3
 import comandos
+import threading
 import subprocess as sp
 
 class Android():
@@ -25,21 +28,46 @@ class Android():
 	def getRede(self):
 		return self._rede
 
-	# def connect(self):
-	# 	print(comandos.CONNECT)
-	# 	connect = sp.getoutput(comandos.CONNECT % self.getIP())
-	# 	print('{} {}'.format(connect, self.getIP()))
-
 	def start_app(self, activity, ip_cloudlet):
 		console = self.getConsole()
 		os.system(comandos.ACTIVITY % (console, activity))
 		os.system(comandos.SET_CLOUDLET % (console, activity, ip_cloudlet))
 
-	def exec_run(self, activity, ip_cloudlet, argumentos):
-		os.system(comandos.EXEC % (self.getConsole(), activity, ip_cloudlet, argumentos))
+	def exec_run(self, activity, ip_cloudlet, argumentos, repeticoes):
+		num_interacoes = 1
+
+		# ciclo de repeticoes da activity
+		while num_interacoes <= repeticoes:
+			print("Interacao numero %i do dispositivo %s" % (num_interacoes, self.getNome()))
+
+			# chamada da activity
+			os.system(comandos.EXEC % (self.getConsole(), activity, ip_cloudlet, argumentos))
+
+			# loop para esperar os resultados
+			while True:
+				# captura dos resultados do logcat do dispositivo e escreve em um arquivo com o mesmo nome do container
+				self.getResults()
+
+				try:
+					# retorna a quantidade de linhas do arquivo
+					lines = sp.getoutput(comandos.COUNT_LINES % self.getNome())
+					# se a quantidade for igual ao numero de repeticoes
+					# a acitvity ja foi executado e pode-se ir para a proxima interacao
+					if int(lines) == num_interacoes:
+						num_interacoes += 1
+						break
+					# caso contratio o loop continua
+				except:
+					time.sleep(1)
+
+		print("Execucoes do dispositivo %s foram concluidas!" % self.getNome())
 
 	def getResults(self):
 		os.system(comandos.RESULTS % (self.getConsole(), self.getNome()))
+
+	def run(self, activity, ip_cloudlet, argumentos, repeticoes):
+		android_thread = threading.Thread(target=self.exec_run, args=(activity, ip_cloudlet, argumentos, repeticoes,))
+		android_thread.start()
 
 class DeviceManager():
 
@@ -86,5 +114,5 @@ class DeviceManager():
 		
 		android.start_app(activity, self.ip_cloudlet)
 
-	def exec_activity(self, android, activity, argumentos):
-		android.exec_run(activity, self.ip_cloudlet, argumentos)
+	def exec_activity(self, android, activity, argumentos, repeticoes):
+		android.run(activity, self.ip_cloudlet, argumentos, repeticoes)

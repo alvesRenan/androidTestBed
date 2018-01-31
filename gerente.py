@@ -11,7 +11,7 @@ from texttable import Texttable
 class Gerente():
 	def __init__(self):
 		# conexão com o docker, utilize o comando 'docker version' e descubra a versão da API do servidor
-		self.client = docker.from_env(version='1.24')
+		self.client = docker.from_env(version='1.26')
 		# conexao com o sqlite
 		self.conn = sqlite3.connect('mydb.db')
 		# criacao do cursor
@@ -122,12 +122,11 @@ class Gerente():
 						container.restart()
 
 						# não faz sentido mas é preciso esperar um tempo entre o start e o exec
-						time.sleep(5)
+						time.sleep(10)
 
 						try:
 							# se for um container cliente inicia o emulador
 							container.exec_run(comandos.START_EMU % (i[1]), detach=True)
-
 						except:
 							pass
 					# caso seja um container servidor

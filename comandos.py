@@ -45,14 +45,19 @@ GET_IP = "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{
 START_EMU = "sh -c 'emulator -avd nexus_5_5.1.1 -netspeed %s'"
 
 # Adiciona o IP do container no arquivo config.properties, substituindo o IP padrao
-MPOS_IP_CHANGE = 'sed -i "s/CHANGE/%s/" config.properties'
+MPOS_IP_CHANGE = 'cd /home/ ; sed -i "s/CHANGE/%s/" config.properties'
 
 # Adiciona um campo padrao no local do IP no arquivo config.properties,
 # substituindo o IP corrente pelo valor 'CHANGE' para facilitar a mudanca na proxima execucao
 # Exemplo: sed -i "s/172.18.0.2/CHANGE/" config.properties
-MPOS_DEFAULT = 'sed -i "s/%s/CHANGE/ config.properties"'
+MPOS_DEFAULT = 'cd /home/ ; sed -i "s/%s/CHANGE/ config.properties"'
 
 # Inicia o servidor MpOS
 START_MPOS = "cd /home/ ; java -jar mposplatform.jar"
 
 ###################################
+
+##### OUTROS COMANDOS #####
+# Retorna o numero de linhas de um arquivo
+# Exemplo: wc -l android-2-1-lte | cut -f1 -d' '
+COUNT_LINES = "wc -l %s | cut -f1 -d' '"
