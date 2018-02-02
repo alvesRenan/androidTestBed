@@ -4,7 +4,7 @@
 ADB_START = "adb devices"
 
 # Mata o processo do ADB
-ADB_KILL = "adb kill-server"
+ADB_KILL = "adb kill-server ; adb start-server > /dev/null "
 
 # Lista com os dispositivos conectados
 # saida exemplo:

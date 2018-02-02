@@ -50,17 +50,6 @@ class Gerente():
 		# mostra a tabela
 		print(table.draw())
 
-	# retorna o IP do containers de um cenário
-	# def listar_ip_containers(self, nome_cenario):
-	# 	self.cur.execute('SELECT nome_container FROM containers WHERE nome_cenario = :nome', { 'nome': nome_cenario })
-	# 	res = self.cur.fetchall()
-	# 	ips = []
-
-	# 	for i in range(len(res)):
-	# 		ips.append(sp.getoutput(comandos.GET_IP % res[i][0]))
-
-	# 	return ips
-
 	def listar_console_dispositivos(self, nome_cenario):
 		self.cur.execute('SELECT porta_5554 FROM containers WHERE nome_cenario = :nome AND is_server = :var', { 'nome': nome_cenario, 'var': 0 })
 		consoles = []
@@ -101,6 +90,18 @@ class Gerente():
 		# nome nao existe
 		return False
 
+	def iniciar_emulador(self, lista_containers):
+		time.sleep(10)
+
+		for container in self.client.containers.list(all=True):
+			for i in lista_containers:
+				# posição 0 contém o nome do container a posição 1 contém o tipo de rede que ele deve usar
+				if (i[0] == container.name):
+					if (i[2] == 0):
+						try:
+							container.exec_run(comandos.START_EMU % (i[1]), detach=True)
+						except:
+							pass
 
 	def iniciar_cenario(self, nome_cenario):
 		# retorna o nome e o tipo de rede de containers em estado PARADO ou CRIADO do cenário
@@ -120,15 +121,6 @@ class Gerente():
 					if (i[2] == 0):
 						# inicia o container
 						container.restart()
-
-						# não faz sentido mas é preciso esperar um tempo entre o start e o exec
-						time.sleep(10)
-
-						try:
-							# se for um container cliente inicia o emulador
-							container.exec_run(comandos.START_EMU % (i[1]), detach=True)
-						except:
-							pass
 					# caso seja um container servidor
 					else:
 						# inicia o container
@@ -148,6 +140,8 @@ class Gerente():
 							self.cur.execute("UPDATE containers SET estado_container = ? WHERE nome_container = ?", ('EXECUTANDO', i[0]))
 						except Exception as e:
 							raise e
+
+		self.iniciar_emulador(resultado)
 
 		# atualiza o estado cenario no banco para ATIVO
 		with self.conn:
@@ -198,14 +192,9 @@ class Gerente():
 	def conectar_dispositivos(self, nome_cenario):
 		os.system(comandos.ADB_KILL)
 		output = sp.getoutput(comandos.ADB_START)
+		# os.system(comandos.ADB_START)
 
 		print(output)
-
-		# consoles = self.listar_console_dispositivos(nome_cenario)
-
-		# for i in consoles:
-		# 	connect = sp.getoutput(comandos.CONNECT % i)
-		# 	print('{} {}'.format(connect, i))
 			
 	# instalar app
 	def install_app(self, apk, nome_cenario):
