@@ -1,6 +1,2 @@
 docker
-sqlite3
-os
-time
 texttable
-subprocess
