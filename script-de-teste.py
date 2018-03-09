@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 
-import time
-
 # importa a API
 from DeviceManagerAPI import DeviceManager
+import time
 
 # instancia a classe da API passando o nome do cenario e o ip da cloudlet
-DM = DeviceManager("cenario-2", "10.0.0.2")
+DM = DeviceManager("cenario-1", "192.168.1.36")
 
 # guarda os dispositivos do cénario em uma variavel
 dispositivos = DM.getDevices()

@@ -138,7 +138,20 @@ class Criador():
 			tty = True,
 			stdin_open = True,
 			privileged = True,
-			network = 'isolated_nw',
+			# network = 'isolated_nw',
+			ports = {
+				'30015/tcp': 30015,
+				'31000/tcp': 31000,
+				'36381/tcp': 36381,
+				'36415/tcp': 36415,
+				'40000/tcp': 40000,
+				'40001/tcp': 40001,
+				'40005/tcp': 40005,
+				'40006/tcp': 40006,
+				'40010/tcp': 40010,
+				'40011/tcp': 40011,
+				'40020/tcp': 40020
+			},
 			publish_all_ports = True,
 			cap_add = ['NET_ADMIN'],
 			name = novo_container.nome
