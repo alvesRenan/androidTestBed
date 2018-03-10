@@ -13,7 +13,9 @@ dispositivos = DM.getDevices()
 # inicia a app desejada nos dispositivos
 for android in dispositivos:
 	DM.start_app(android, "br.ufc.great.matrixoperation/.MainActivity")
-	time.sleep(5)
+
+# tempo para que a aplicação descubra o cloudlet
+time.sleep(15)
 
 # define a qtd de repeticoes, a activity e os argumentos a serem executados
 for android in dispositivos:
