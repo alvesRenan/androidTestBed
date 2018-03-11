@@ -4,7 +4,7 @@ import os
 import time
 import random
 import sqlite3
-import comandos
+import Recursos.comandos as comandos
 import threading
 import subprocess as sp
 
@@ -77,7 +77,7 @@ class DeviceManager():
 
 	def getDevices(self):
 		# conexão com a database
-		conn = sqlite3.connect('mydb.db')
+		conn = sqlite3.connect('DB/mydb.db')
 		cur = conn.cursor()
 
 		self.devices = []

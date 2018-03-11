@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-import comandos
-from criador import Criador
-from gerente import Gerente
-from class_container import Container
+import Recursos.comandos as comandos
+from Componentes.criador import Criador
+from Componentes.gerente import Gerente
+from Recursos.class_container import Container
 
 class Main_Script():
 

@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
 # importa a API
-from DeviceManagerAPI import DeviceManager
+from Recursos.DeviceManagerAPI import DeviceManager
 import time
 
 # instancia a classe da API passando o nome do cenario e o ip da cloudlet
-DM = DeviceManager("cenario-1", "192.168.1.36")
+DM = DeviceManager("teste", "192.168.1.33")
 
 # guarda os dispositivos do cénario em uma variavel
 dispositivos = DM.getDevices()
@@ -15,8 +15,9 @@ for android in dispositivos:
 	DM.start_app(android, "br.ufc.great.matrixoperation/.MainActivity")
 
 # tempo para que o app descubra o cloudlet
+print("\nTempo para os dispositivos se comunicarem com o cloudlet.\n")
 time.sleep(15)
 
 # define a qtd de repeticoes, a activity e os argumentos a serem executados
 for android in dispositivos:
-	DM.exec_activity(android, "br.ufc.great.matrixoperation/.MainActivity", "--es 'operation' 'mul' --ei 'size' 500", 5)
+	DM.exec_activity(android, "br.ufc.great.matrixoperation/.MainActivity", "--es 'operation' 'mul' --ei 'size' 500", 2)

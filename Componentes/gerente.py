@@ -4,7 +4,7 @@ import os
 import time
 import docker
 import sqlite3
-import comandos
+import Recursos.comandos as comandos
 import subprocess as sp
 from texttable import Texttable
 
@@ -13,7 +13,7 @@ class Gerente():
 		# conexão com o docker, utilize o comando 'docker version' e descubra a versão da API do servidor
 		self.client = docker.from_env(version='1.26')
 		# conexao com o sqlite
-		self.conn = sqlite3.connect('mydb.db')
+		self.conn = sqlite3.connect('DB/mydb.db')
 		# criacao do cursor
 		self.cur = self.conn.cursor()
 
