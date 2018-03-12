@@ -1,12 +1,6 @@
 # androidTestBed
 Ferramenta para a criação de ambientes de testes com dispositivos Android
 
-- Download da imagem do cliente:
-   docker pull renanalves/android-testbed
-
-- Download da imagem do servidor:
-   docker pull renanalves/server-testbed
-
 ## Primeiros passos
 Primeiro é necessário saber qual a versão da API utilizado pela parte servidor do Docker:
 ```
@@ -18,6 +12,20 @@ O próximo passo é a criação da rede utilizada pelos containers (a subnet nã
 ```
 # docker network create --subnet 10.0.0.0/16 isolated_nw
 ```
+
+Fazendo o download das Imagens:
+- Download da imagem do cliente:
+   docker pull renanalves/android-testbed
+
+- Download da imagem do servidor:
+   docker pull renanalves/server-testbed
+
 ## Utilizando a ferramenta
+Um vídeo demonstrando a instalação pode ser encontrado em:
+https://youtu.be/7nu-24ESTl0
+
+Alem de um vídeo demonstrando a ferramenta em execução:
+https://youtu.be/uZj6Gl6R19Q
+
 O passo a passo para a utilização da ferramenta e também como ela está estrutura podem ser visto no link abaixo:
 https://www.dropbox.com/s/bipjyqt5npdad5e/TCC_II_Renan.pdf?dl=0
