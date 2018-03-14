@@ -28,4 +28,4 @@ Alem de um vídeo demonstrando a ferramenta em execução:
 https://youtu.be/uZj6Gl6R19Q
 
 O passo a passo para a utilização da ferramenta e também como ela está estrutura podem ser visto no link abaixo:
-https://www.dropbox.com/s/bipjyqt5npdad5e/TCC_II_Renan.pdf?dl=0
+http://www.repositorio.ufc.br/bitstream/riufc/29546/1/2017_tcc_rabarbosa.pdf
