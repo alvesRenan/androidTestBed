@@ -26,7 +26,8 @@ class Criador():
 							porta_5555 integer,
 							rede text,
 							estado_container text default 'CRIADO',
-							is_server integer default 0
+							is_server integer default 0,
+							memory text
 						)"""
 					)
 			except:
@@ -104,8 +105,8 @@ class Criador():
 		with self.conn:
 			try:
 				self.cur.execute(
-					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede) VALUES (?, ?, ?, ?, ?, ?)",
-					(novo_container.cenario, novo_container.nome, self.porta_6080, self.porta_5554, self.porta_5555, rede)
+					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory) VALUES (?, ?, ?, ?, ?, ?, ?)",
+					(novo_container.cenario, novo_container.nome, self.porta_6080, self.porta_5554, self.porta_5555, rede, novo_container.memory)
 				)
 
 				self.client.containers.run(

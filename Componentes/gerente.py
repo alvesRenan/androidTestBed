@@ -36,16 +36,25 @@ class Gerente():
 		res = self.cur.fetchall()
 
 		table = Texttable()
-		table.add_row(['Nome Container', 'IP', 'VNC', 'Rede', 'Estado'])
+		table.add_row(['Nome Container', 'IP', 'VNC', 'Rede', 'Memória', 'Estado'])
 
 		for i in range(len(res)):
-			# 0 -> nome_cenario; 1 -> nome_container; 2 -> porta_6080; 5 -> rede; 6 -> estado
+			# 0 -> nome_cenario; 1 -> nome_container; 2 -> porta_6080;
+			# 5 -> rede; 6 -> estado; 7 -> servidor ou não 8 -> memoria
+			
 			# coletando o IP do container
 			ip = sp.getoutput(comandos.GET_IP % res[i][1])
-			# criando o edereço para o noVNC
-			vnc = 'localhost:%s' % str(res[i][2])
+
+			if res[i][7] == 0:
+				# criando o edereço para o noVNC
+				vnc = 'localhost:%s' % str(res[i][2])
+				memory = res[i][8]
+			else:
+				vnc = 'NONE'
+				memory = 'NONE'
+
 			# adiciona uma linha na tabela
-			table.add_row([res[i][1], ip, vnc, res[i][5], res[i][6]])
+			table.add_row([res[i][1], ip, vnc, res[i][5], memory, res[i][6]])
 
 		# mostra a tabela
 		print(table.draw())
@@ -97,16 +106,18 @@ class Gerente():
 			for i in lista_containers:
 				# posição 0 contém o nome do container a posição 1 contém o tipo de rede que ele deve usar
 				if (i[0] == container.name):
+					# posição 2 diz se ele é cliente ou servidor
 					if (i[2] == 0):
 						try:
-							container.exec_run(comandos.START_EMU % (i[1]), detach=True)
+							# posição 3 tem a qtd de memoria usada pelo emulador
+							container.exec_run(comandos.START_EMU % (i[1], i[3]), detach=True)
 						except:
 							pass
 
 	def iniciar_cenario(self, nome_cenario):
 		# retorna o nome e o tipo de rede de containers em estado PARADO ou CRIADO do cenário
 		self.cur.execute(
-			'SELECT nome_container, rede, is_server FROM containers WHERE nome_cenario = ? AND (estado_container = ? OR estado_container = ?)', 
+			'SELECT nome_container, rede, is_server, memory FROM containers WHERE nome_cenario = ? AND (estado_container = ? OR estado_container = ?)', 
 			(nome_cenario, 'CRIADO', 'PARADO')
 			)
 		resultado = self.cur.fetchall()

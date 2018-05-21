@@ -41,8 +41,8 @@ RESULTS = "adb -s emulator-%s shell logcat -d | grep DebugRpc > %s"
 GET_IP = "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' %s"
 
 # Inicia o emulador com a configuracao de rede indicada em um container com estado PARADO ou CRIADO
-# exemplo: sh -c 'emulator -avd nexus_5_5.1.1 -netspeed lte'
-START_EMU = "sh -c 'emulator -avd nexus_5_5.1.1 -accel auto -netspeed %s'"
+# exemplo: sh -c 'emulator -avd nexus_5_5.1.1 -netspeed lte -memory 512'
+START_EMU = "sh -c 'emulator -avd nexus_5_5.1.1 -accel auto -netspeed %s -memory %s'"
 
 # Adiciona o IP do container no arquivo config.properties, substituindo o IP padrao
 MPOS_IP_CHANGE = 'cd /home/ ; sed -i "s/CHANGE/%s/" config.properties'

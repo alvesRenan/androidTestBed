@@ -106,8 +106,13 @@ class Main_Script():
 								self.gerente.listar_containers(nome_cenario)
 								self.config_cenario()
 
+							print('Configuração de memória RAM (em MB) do dispositivo (valor padrão 512 MBs)')
+							memory = input('Digite a quantidade de memória do dispositivo: ')
+							if int(memory) < 512:
+								memory = '512'
+
 							# criação do objeto Container
-							novo_container = Container(nome, nome_cenario)
+							novo_container = Container(nome, nome_cenario, memory)
 							# cria o container e insere no banco de dados
 							self.criador.criar_cliente(novo_container, rede)
 							
