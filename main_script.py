@@ -102,9 +102,10 @@ class Main_Script():
 							rede = input('Digite o nome da rede a ser usada: ')
 							if (rede not in regex):
 								os.system('clear')
-								print('Rede não compatível!')
-								self.gerente.listar_containers(nome_cenario)
-								self.config_cenario()
+								print('Rede não compatível! Utilizando rede padrão full')
+								rede = 'full'
+								# self.gerente.listar_containers(nome_cenario)
+								# self.config_cenario()
 
 							print('Configuração de memória RAM (em MB) do dispositivo (valor padrão 512 MBs)')
 							memory = input('Digite a quantidade de memória do dispositivo: ')
