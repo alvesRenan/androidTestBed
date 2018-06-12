@@ -25,28 +25,28 @@ class Main_Script():
 		print('===================================================')
 		option = input(">> ")
 
-		if (option == '1'):
+		if option == '1':
 			self.criar_cenario()
 
-		if (option == '2'):
+		if option == '2':
 			os.system('clear')
 			self.gerente.listar_cenarios()
 			self.menu()
 
-		if (option == '3'):
+		if option == '3':
 			self.config_cenario()
 
-		if (option == '4'):
+		if option == '4':
 			self.deleta_cenario()
 
-		if (option == '0'):
+		if option == '0':
 			self.close()
 
 	def criar_cenario(self):
 		nome = input('Nome do novo cenário: ')
 		
 		# se False ele chama esta função novamente para a inserção de outro nome
-		if (self.criador.criar_cenario(nome) == False):
+		if self.criador.criar_cenario(nome) == False:
 			self.criar_cenario()
 
 		self.menu()
@@ -56,7 +56,7 @@ class Main_Script():
 		self.gerente.listar_cenarios()
 		nome = input('Nome do cenário que será excluido: ')
 
-		if (not self.gerente.cenario_existe(nome)):
+		if not self.gerente.cenario_existe(nome):
 			self.criador.deleta_cenario(nome)
 
 		self.menu()
@@ -68,8 +68,8 @@ class Main_Script():
 		os.system('clear')
 
 		# caso retorne False quer dizer que o cenário já existe, caso contrário deve ser usada a opção 'Criar cenário'
-		if (self.gerente.cenario_existe(nome_cenario) == False):
-			while (sair == False):
+		if not self.gerente.cenario_existe(nome_cenario):
+			while not sair:
 				check = False
 
 				print('=======================================')
@@ -87,29 +87,34 @@ class Main_Script():
 				option = input('>> ')
 
 				# carcterísticas do container cliente que será criado
-				if (option == '1'):
-					while (check == False):
+				if option == '1':
+					while not check:
 						#tipo = 'cliente'
 						nome = input('Digite o nome do container: ')
 						
 						# checagem se o nome já existe
-						if (self.gerente.container_existe(nome) == False):
+						if not self.gerente.container_existe(nome):
 						# se False
 							
 							print('Configurações de rede disponíveis: umts, lte, full')
 							regex = ['umts', 'lte', 'full']
 
 							rede = input('Digite o nome da rede a ser usada: ')
-							if (rede not in regex):
+							if rede not in regex:
 								os.system('clear')
-								print('Rede não compatível! Utilizando rede padrão full')
+								print('Rede não compatível! Utilizando rede padrão \'full\'')
 								rede = 'full'
 								# self.gerente.listar_containers(nome_cenario)
 								# self.config_cenario()
 
 							print('Configuração de memória RAM (em MB) do dispositivo (valor padrão 512 MBs)')
 							memory = input('Digite a quantidade de memória do dispositivo: ')
-							if int(memory) < 512:
+
+							try:
+								if int(memory) < 512:
+									memory = '512'
+							except:
+								print("Valor inválido, utilizando valor padrão.")
 								memory = '512'
 
 							# criação do objeto Container
@@ -125,13 +130,13 @@ class Main_Script():
 						# fim do loop
 						check = True
 
-				if (option == '2'):
-					while (check == False):
+				if option == '2':
+					while not check:
 						#tipo = 'server'
 						nome = input('Digite o nome do container: ')
 
 						# checagem se o nome já existe
-						if (self.gerente.container_existe(nome) == False):
+						if not self.gerente.container_existe(nome):
 						# se False
 							novo_container = Container(nome, nome_cenario)
 							self.criador.criar_server(novo_container)
@@ -143,35 +148,35 @@ class Main_Script():
 						# fim do loop
 						check = True
 
-				if (option == '3'):
+				if option == '3':
 					os.system('clear')
 					self.gerente.listar_containers(nome_cenario)
 
-				if (option == '4'):
+				if option == '4':
 					nome = input('Digite o nome do container: ')
 					
-					if (self.gerente.container_existe(nome) == True):
+					if self.gerente.container_existe(nome):
 						self.criador.deleta_container(nome)
 
 					else:
 						print('Container não existe ou não faz parte deste cenário!')
 
-				if (option == '5'):
+				if option == '5':
 					self.gerente.conectar_dispositivos(nome_cenario)
 
-				if (option == '6'):
+				if option == '6':
 					apk  = input('Digite o caminho do apk: ')
 					self.gerente.install_app(apk, nome_cenario)
 
-				if (option == '8'):
+				if option == '8':
 					print('Esta ação pode demorar um pouco ...')
 					self.gerente.iniciar_cenario(nome_cenario)
 
-				if (option == '9'):
+				if option == '9':
 					print('Esta ação pode demorar um pouco ...')
 					self.gerente.parar_cenario(nome_cenario)
 
-				if (option == '0'):
+				if option == '0':
 					sair = True
 			
 			self.menu()

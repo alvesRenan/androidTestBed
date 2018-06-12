@@ -46,27 +46,27 @@ class Criador():
 		# procurar as maiores portas em uso e definindo o valor das portas para novos containers
 		self.cur.execute('SELECT MAX(porta_6080) FROM containers')
 		resposta = self.cur.fetchone()
-		if (resposta[0] == None):
+		if resposta[0] == None:
 			self.porta_6080 = 6080
 		else:
 			self.porta_6080 = resposta[0] + 1
 
 		self.cur.execute('SELECT MAX(porta_5554) FROM containers')
 		resposta = self.cur.fetchone()
-		if (resposta[0] == None):
+		if resposta[0] == None:
 			self.porta_5554 = 5554
 		else:
 			self.porta_5554 = resposta[0] + 2
 
 		self.cur.execute('SELECT MAX(porta_5555) FROM containers')
 		resposta = self.cur.fetchone()
-		if (resposta[0] == None):
+		if resposta[0] == None:
 			self.porta_5555 = 5555
 		else:
 			self.porta_5555 = resposta[0] + 2
 
 	def criar_cenario(self, nome_cenario):
-		if (self.gerente.cenario_existe(nome_cenario) == True):
+		if self.gerente.cenario_existe(nome_cenario):
 			# insercao no arquivo mydb.db
 			with self.conn:
 				try:
@@ -170,7 +170,7 @@ class Criador():
 
 	def deleta_container(self, nome_container):
 		for container in self.client.containers.list(all=True):
-			if (container.name == nome_container):
+			if container.name == nome_container:
 				print('Deletando o container %s' % container.name)
 				container.remove(force=True)
 				

@@ -45,7 +45,8 @@ class Android():
 
 			# loop para esperar os resultados
 			while True:
-				# captura dos resultados do logcat do dispositivo e escreve em um arquivo com o mesmo nome do container
+				# captura dos resultados do logcat do dispositivo e escreve em um arquivo 
+				# com o mesmo nome do container
 				self.getResults()
 
 				try:
@@ -89,7 +90,14 @@ class DeviceManager():
 		res = cur.fetchall()
 
 		for i in range(len(res)):
-			# 0 -> nome_cenario; 1 -> nome_container; 2 -> porta_6080; 3 -> porta do adb 5 -> rede; 6 -> estado
+			"""
+			 0 -> nome_cenario
+			 1 -> nome_container
+			 2 -> porta_6080
+			 3 -> porta do adb 
+			 5 -> rede;
+			 6 -> estado
+			"""
 
 			console = res[i][3]
 			vnc = 'localhost:%s' % str(res[i][2])
@@ -107,10 +115,12 @@ class DeviceManager():
 		return self.devices
 
 	def start_app(self, android, activity):
-		# iniciar o app e definir a cloudlet
-		# exemplo: voce faz um for na lista de dispositivos e executa o metodo start_app para cada dispositivo na lista
-		# for device in api.getDevices(cenario):
-		# 	api.start_app(device, activity, argumentos)
+		""" 
+		 iniciar o app e definir a cloudlet
+		 exemplo: voce faz um for na lista de dispositivos e executa o metodo start_app para cada dispositivo na lista
+		 for device in api.getDevices(cenario):
+		 	api.start_app(device, activity, argumentos)
+		"""
 		
 		android.start_app(activity, self.ip_cloudlet)
 

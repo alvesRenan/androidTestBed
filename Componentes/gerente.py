@@ -36,11 +36,20 @@ class Gerente():
 		res = self.cur.fetchall()
 
 		table = Texttable()
-		table.add_row(['Nome Container', 'IP', 'VNC', 'Rede', 'Memória', 'Estado'])
+		table.header(['Nome Container', 'IP', 'VNC', 'Emulador', 'Rede', 'Memória', 'Estado'])
 
 		for i in range(len(res)):
-			# 0 -> nome_cenario; 1 -> nome_container; 2 -> porta_6080;
-			# 5 -> rede; 6 -> estado; 7 -> servidor ou não 8 -> memoria
+			""" 
+				0 -> nome_cenario
+				1 -> nome_container
+				2 -> porta_6080
+				3 -> porta_5554
+				4 -> porta_5555
+				5 -> rede
+				6 -> estado
+				7 -> servidor ou não 
+				8 -> memoria
+			"""
 			
 			# coletando o IP do container
 			ip = sp.getoutput(comandos.GET_IP % res[i][1])
@@ -49,12 +58,18 @@ class Gerente():
 				# criando o edereço para o noVNC
 				vnc = 'localhost:%s' % str(res[i][2])
 				memory = res[i][8]
+				console_adb = 'emulator-%s' % str(res[i][3])
 			else:
 				vnc = 'NONE'
 				memory = 'NONE'
+				console_adb = 'NONE'
+
+			# configurações de formatação da tabela
+			table.set_cols_width([12, 10, 15, 15, 5, 8, 15])
+			table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c'])
 
 			# adiciona uma linha na tabela
-			table.add_row([res[i][1], ip, vnc, res[i][5], memory, res[i][6]])
+			table.add_row([res[i][1], ip, vnc, console_adb, res[i][5], memory, res[i][6]])
 
 		# mostra a tabela
 		print(table.draw())
@@ -79,7 +94,7 @@ class Gerente():
 		# checagem de nome unico
 		for i in resultado:
 			# comparacao com as tuplas retornadas
-			if (i == nome):
+			if i == nome:
 				return False
 
 		return True
@@ -92,7 +107,7 @@ class Gerente():
 		
 		# checagem por nome repetido de containers
 		for i in self.cur.fetchall():
-			if (i == nome):
+			if i == nome:
 				# nome existe
 				return True
 
@@ -105,9 +120,9 @@ class Gerente():
 		for container in self.client.containers.list(all=True):
 			for i in lista_containers:
 				# posição 0 contém o nome do container a posição 1 contém o tipo de rede que ele deve usar
-				if (i[0] == container.name):
+				if i[0] == container.name:
 					# posição 2 diz se ele é cliente ou servidor
-					if (i[2] == 0):
+					if i[2] == 0:
 						try:
 							# posição 3 tem a qtd de memoria usada pelo emulador
 							container.exec_run(comandos.START_EMU % (i[1], i[3]), detach=True)
@@ -119,7 +134,7 @@ class Gerente():
 		self.cur.execute(
 			'SELECT nome_container, rede, is_server, memory FROM containers WHERE nome_cenario = ? AND (estado_container = ? OR estado_container = ?)', 
 			(nome_cenario, 'CRIADO', 'PARADO')
-			)
+		)
 		resultado = self.cur.fetchall()
 
 		# lista de containers ativos
@@ -127,9 +142,9 @@ class Gerente():
 			# resultado dos containers que fazem parte do cenário
 			for i in resultado:
 				# posição 0 contém o nome do container a posição 1 contém o tipo de rede que ele deve usar
-				if (i[0] == container.name):
+				if i[0] == container.name:
 					# caso seja um container cliente
-					if (i[2] == 0):
+					if i[2] == 0:
 						# inicia o container
 						container.restart()
 					# caso seja um container servidor
@@ -165,16 +180,16 @@ class Gerente():
 		self.cur.execute(
 			'SELECT nome_container, is_server FROM containers WHERE nome_cenario = ? AND (estado_container = ? OR estado_container = ?)', 
 			(nome_cenario, 'CRIADO', 'EXECUTANDO')
-			)
+		)
 		
 		resultado = self.cur.fetchall()
 
 		for container in self.client.containers.list():
 			for i in resultado:
 				# posição 0 contém o nome do container a posição 1 diz se o container é cliente ou servidor
-				if (i[0] == container.name):
+				if i[0] == container.name:
 					# se for servidor
-					if (i[1] == 1):
+					if i[1] == 1:
 						# coleta o IP do servidor
 						ip_servidor = sp.getoutput(comandos.GET_IP % container.name)
 						# forma o comando sed
