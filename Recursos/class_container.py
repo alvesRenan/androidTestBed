@@ -1,5 +1,5 @@
 class Container():
-	def __init__(self, nome_container, nome_cenario, memory):
+	def __init__(self, nome_container, nome_cenario, memory=None):
 		# nome do container
 		self.nome = nome_container
 		# cenario ao qual o container pertence
