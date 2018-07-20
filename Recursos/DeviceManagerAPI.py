@@ -9,49 +9,51 @@ import threading
 import subprocess as sp
 
 class Android():
-	
+
 	def __init__(self, nome, console, vnc, rede):
-		self._nome = nome
-		self._console = console
-		self._vnc = vnc
-		self._rede = rede
+		self.nome = nome
+		self.console = console
+		self.vnc = vnc
+		self.rede = rede
 
-	def getNome(self):
-		return self._nome
+	# def getNome(self):
+	# 	return self._nome
 
-	def getConsole(self):
-		return self._console
+	# def getConsole(self):
+	# 	return self._console
 
-	def getVNC(self):
-		return self._vnc
+	# def getVNC(self):
+	# 	return self._vnc
 
-	def getRede(self):
-		return self._rede
+	# def getRede(self):
+	# 	return self._rede
 
 	def start_app(self, activity, ip_cloudlet):
-		console = self.getConsole()
-		os.system(comandos.ACTIVITY % (console, activity))
-		os.system(comandos.SET_CLOUDLET % (console, activity, ip_cloudlet))
+		os.system(comandos.ACTIVITY % (self.console, activity))
+		os.system(comandos.SET_CLOUDLET % (self.console, activity, ip_cloudlet))
 
 	def exec_run(self, activity, ip_cloudlet, argumentos, repeticoes):
+		# limpa o logcat para remover resultados de experimentos anteriores
+		os.system(comandos.CLEAR_LOG % self.console)
+
 		num_interacoes = 1
 
 		# ciclo de repeticoes da activity
 		while num_interacoes <= repeticoes:
-			print("Interacao numero %i do dispositivo %s" % (num_interacoes, self.getNome()))
+			print("Interacao numero %i do dispositivo %s" % (num_interacoes, self.nome))
 
 			# chamada da activity
-			os.system(comandos.EXEC % (self.getConsole(), activity, ip_cloudlet, argumentos))
+			os.system(comandos.EXEC % (self.console, activity, ip_cloudlet, argumentos))
 
 			# loop para esperar os resultados
 			while True:
-				# captura dos resultados do logcat do dispositivo e escreve em um arquivo 
+				# captura dos resultados do logcat do dispositivo e escreve em um arquivo
 				# com o mesmo nome do container
 				self.getResults()
 
 				try:
 					# retorna a quantidade de linhas do arquivo
-					lines = sp.getoutput(comandos.COUNT_LINES % self.getNome())
+					lines = sp.getoutput(comandos.COUNT_LINES % self.nome)
 					# se a quantidade for igual ao numero de repeticoes
 					# a acitvity ja foi executado e pode-se ir para a proxima interacao
 					if int(lines) == num_interacoes:
@@ -61,12 +63,14 @@ class Android():
 				except:
 					time.sleep(1)
 
-		print("Execucoes do dispositivo %s foram concluidas!" % self.getNome())
+		print("Execucoes do dispositivo %s foram concluidas!" % self.nome)
 
 	def getResults(self):
-		os.system(comandos.RESULTS % (self.getConsole(), self.getNome()))
+		os.system(comandos.RESULTS % (self.console, self.nome))
 
 	def run(self, activity, ip_cloudlet, argumentos, repeticoes):
+		# time.sleep(random.randrange(1, 5))
+
 		android_thread = threading.Thread(target=self.exec_run, args=(activity, ip_cloudlet, argumentos, repeticoes,))
 		android_thread.start()
 
@@ -94,7 +98,7 @@ class DeviceManager():
 			 0 -> nome_cenario
 			 1 -> nome_container
 			 2 -> porta_6080
-			 3 -> porta do adb 
+			 3 -> porta do adb
 			 5 -> rede;
 			 6 -> estado
 			"""
@@ -115,13 +119,13 @@ class DeviceManager():
 		return self.devices
 
 	def start_app(self, android, activity):
-		""" 
+		"""
 		 iniciar o app e definir a cloudlet
 		 exemplo: voce faz um for na lista de dispositivos e executa o metodo start_app para cada dispositivo na lista
 		 for device in api.getDevices(cenario):
 		 	api.start_app(device, activity, argumentos)
 		"""
-		
+
 		android.start_app(activity, self.ip_cloudlet)
 
 	def exec_activity(self, android, activity, argumentos, repeticoes):

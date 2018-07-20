@@ -12,24 +12,28 @@ ADB_KILL = "adb kill-server ; adb start-server > /dev/null "
 LIST = "adb devices | awk 'NR>1 { print($1) }'"
 
 # Instala a aplicacao em dispositivo
-# exemplo: adb -P 5038 -s emulator-5070 install -t App.apk
+# exemplo: adb -s emulator-5070 install -t App.apk
 INSTALL_APP = "adb -s emulator-%s install -t %s"
 
 # Inicia a activity principal da aplicacao
-# Exemplo: adb -P 5038 -s emulator-5070 shell am start -S br.ufc.great.matrixoperation/.MainActivity
+# Exemplo: adb -s emulator-5070 shell am start -S br.ufc.great.matrixoperation/.MainActivity
 ACTIVITY = "adb -s emulator-%s shell am start -S %s"
 
 # Inicia a activity passando o IP do cloudlet
-# Exemplo: adb -P 5038 -s emulator-5070 shell am start -n br.ufc.great.matrixoperation/.MainActivity --es "cloudlet" "172.18.0.2"
+# Exemplo: adb -s emulator-5070 shell am start -n br.ufc.great.matrixoperation/.MainActivity --es "cloudlet" "172.18.0.2"
 SET_CLOUDLET = "adb -s emulator-%s shell am start -n %s --es 'cloudlet' '%s'"
 
 # Executa uma activity da aplicacao em um dispositivo passando o IP da cloudlet
-# exemplo: adb -P 5038 -s emulator-5070 shell am start -n br.ufc.great.matrixoperation/.MainActivity --es "cloudlet" "172.18.0.2" --es "operation" "mul" --ei "size" 500
+# exemplo: adb -s emulator-5070 shell am start -n br.ufc.great.matrixoperation/.MainActivity --es "cloudlet" "172.18.0.2" --es "operation" "mul" --ei "size" 500
 EXEC = "adb -s emulator-%s shell am start -n %s --es 'cloudlet' '%s' %s"
 
 # Coleta os dados de execucao do logcat e salva em um arquivo com o mesmo nome do container
-# Exemplo: adb -P 5038 -s emulator-5070 shell logcat -t | grep DebugRpc > file.txt
+# Exemplo: adb -s emulator-5070 shell logcat -t | grep DebugRpc > file.txt
 RESULTS = "adb -s emulator-%s shell logcat -d | grep DebugRpc > %s"
+
+# Limpa o logcat do dispositivo
+# Exemplo: adb -s emulator-5070 shell logcat -c
+CLEAR_LOG = "adb -s emulator-%s shell logcat -c"
 
 ###################################
 

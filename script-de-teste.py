@@ -20,4 +20,4 @@ time.sleep(15)
 
 # define a qtd de repeticoes, a activity e os argumentos a serem executados
 for android in dispositivos:
-	DM.exec_activity(android, "br.ufc.great.matrixoperation/.MainActivity", "--es 'operation' 'mul' --ei 'size' 500", 5)
+	DM.exec_activity(android, "br.ufc.great.matrixoperation/.MainActivity", "--es 'operation' 'mul' --ei 'size' 500", 3)
