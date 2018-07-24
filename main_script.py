@@ -73,7 +73,7 @@ class Main_Script():
 				check = False
 
 				print('=======================================')
-				print('Opções de Cenários:\n')
+				print('Opções de Cenários:')
 				print('1 -> Adicionar cliente')
 				print('2 -> Adicionar servidor')
 				print('3 -> Listar containers do cenário')
@@ -82,6 +82,7 @@ class Main_Script():
 				print('6 -> Instalar APP')
 				print('8 -> Iniciar cenário')
 				print('9 -> Parar cenário')
+				print('10 -> Reiniciar um container cliente')
 				print('0 -> Voltar para o menu principal')
 				print('=======================================')
 				option = input('>> ')
@@ -175,6 +176,14 @@ class Main_Script():
 				if option == '9':
 					print('Esta ação pode demorar um pouco ...')
 					self.gerente.parar_cenario(nome_cenario)
+
+				if option == '10':
+					nome = input('Digite o nome do container: ')
+					if self.gerente.container_existe(nome):
+						self.gerente.restart_container(nome)
+					
+					else:
+						print('Container não existe!')
 
 				if option == '0':
 					sair = True

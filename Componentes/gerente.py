@@ -212,7 +212,8 @@ class Gerente():
 			try:
 				self.cur.execute("UPDATE cenarios SET estado_cenario = :novo_estado WHERE nome_cenario = :nome", { 'novo_estado': 'PARADO', 'nome': nome_cenario })
 			except Exception as e:
-				raise e
+				raise e # Latest commit a9494d7  4 days ago
+
 
 	# conexão com os emuladores pelo adb
 	def conectar_dispositivos(self, nome_cenario):
@@ -229,3 +230,19 @@ class Gerente():
 		for i in consoles:
 			saida = os.system(comandos.INSTALL_APP % (i, apk))
 			print(saida)
+
+	def restart_container(self, nome_container):
+		for container in self.client.containers.list():
+			if container.name == nome_container:
+				print('Reiniciando o container %s' % nome_container)
+				container.restart()
+
+				with self.conn:
+					self.cur.execute(
+						'SELECT nome_container, rede, is_server, memory FROM containers WHERE nome_container = ? AND estado_container = ?',
+						(nome_container, 'EXECUTANDO'))
+
+					resultado = self.cur.fetchall()
+
+				print('Reiniciando o emulador no container %s' % nome_container)
+				self.iniciar_emulador(resultado)
