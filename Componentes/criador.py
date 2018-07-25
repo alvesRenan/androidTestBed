@@ -27,7 +27,8 @@ class Criador():
 							rede text,
 							estado_container text default 'CRIADO',
 							is_server integer default 0,
-							memory text
+							memory text,
+							cpus text
 						)"""
 					)
 			except:
@@ -72,7 +73,7 @@ class Criador():
 				try:
 					self.cur.execute(
 						"INSERT INTO cenarios (nome_cenario) VALUES (:nome)",
-						{ 'nome': nome_cenario}
+						{'nome': nome_cenario}
 					)
 
 					print('Cenario criado')
@@ -87,7 +88,7 @@ class Criador():
 			return False
 
 	def deleta_cenario(self, nome_cenario):
-		self.cur.execute('SELECT nome_container FROM containers WHERE nome_cenario = :nome', { 'nome': nome_cenario })
+		self.cur.execute('SELECT nome_container FROM containers WHERE nome_cenario = :nome', {'nome': nome_cenario})
 		res = self.cur.fetchall()
 
 		for i in range(len(res)):
@@ -97,7 +98,7 @@ class Criador():
 
 		with self.conn:
 			try:
-				self.cur.execute('DELETE FROM cenarios WHERE nome_cenario = :nome', { 'nome': nome_cenario })
+				self.cur.execute('DELETE FROM cenarios WHERE nome_cenario = :nome', {'nome': nome_cenario})
 			except Exception as e:
 				raise e
 
@@ -105,19 +106,19 @@ class Criador():
 		with self.conn:
 			try:
 				self.cur.execute(
-					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory) VALUES (?, ?, ?, ?, ?, ?, ?)",
-					(novo_container.cenario, novo_container.nome, self.porta_6080, self.porta_5554, self.porta_5555, rede, novo_container.memory)
+					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory, cpus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+					(novo_container.cenario, novo_container.nome, self.porta_6080, self.porta_5554, self.porta_5555, rede, novo_container.memory, novo_container.cpus)
 				)
 
 				self.client.containers.run(
 					'renanalves/android-testbed',
-					cap_add = ['NET_ADMIN'],
-					detach = True,
-					privileged = True,
-					network = 'isolated_nw',
-					publish_all_ports = True,
-					name = novo_container.nome,
-					ports = {
+					cap_add=['NET_ADMIN'],
+					detach=True,
+					privileged=True,
+					network='isolated_nw',
+					publish_all_ports=True,
+					name=novo_container.nome,
+					ports={
 						'6080/tcp': self.porta_6080,
 						'5554/tcp': self.porta_5554,
 						'5555/tcp': self.porta_5555
@@ -135,12 +136,12 @@ class Criador():
 	def  criar_server(self, novo_container):
 		self.client.containers.run(
 			'renanalves/server-testbed',
-			detach = True,
-			tty = True,
-			stdin_open = True,
-			privileged = True,
+			detach=True,
+			tty=True,
+			stdin_open=True,
+			privileged=True,
 			# network = 'isolated_nw',
-			ports = {
+			ports={
 				'30015/tcp': 30015,
 				'31000/tcp': 31000,
 				'36381/tcp': 36381,
@@ -153,16 +154,17 @@ class Criador():
 				'40011/tcp': 40011,
 				'40020/tcp': 40020
 			},
-			publish_all_ports = True,
-			cap_add = ['NET_ADMIN'],
-			name = novo_container.nome
+			publish_all_ports=True,
+			cap_add=['NET_ADMIN'],
+			name=novo_container.nome,
+			cpuset_cpus=novo_container.cpus
 		)
 
 		with self.conn:
 			try: 
 				self.cur.execute(
-					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, is_server) VALUES (?, ?, ?, ?, ?, ?, ?)",
-					(novo_container.cenario, novo_container.nome,  None, None, None, None, 1)
+					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, is_server, cpus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+					(novo_container.cenario, novo_container.nome, None, None, None, None, 1, novo_container.cpus)
 				)
 
 			except Exception as e:
@@ -175,5 +177,5 @@ class Criador():
 				container.remove(force=True)
 				
 				with self.conn:
-					self.cur.execute('DELETE FROM containers WHERE nome_container = :nome', { 'nome': nome_container })
+					self.cur.execute('DELETE FROM containers WHERE nome_container = :nome', {'nome': nome_container})
 

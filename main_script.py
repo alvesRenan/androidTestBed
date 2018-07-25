@@ -45,11 +45,10 @@ class Main_Script():
 	def criar_cenario(self):
 		nome = input('Nome do novo cenário: ')
 		
-		# se False ele chama esta função novamente para a inserção de outro nome
+		# se False ele chama volta-se ao menu
 		if self.criador.criar_cenario(nome) == False:
-			self.criar_cenario()
-
-		self.menu()
+			# self.criar_cenario()
+			self.menu()
 
 	def deleta_cenario(self):
 		os.system('clear')
@@ -119,7 +118,10 @@ class Main_Script():
 								memory = '512'
 
 							# criação do objeto Container
-							novo_container = Container(nome, nome_cenario, memory)
+							novo_container = Container(
+								nome_container=nome,
+								nome_cenario=nome_cenario,
+								memory=memory)
 							# cria o container e insere no banco de dados
 							self.criador.criar_cliente(novo_container, rede)
 							
@@ -139,7 +141,15 @@ class Main_Script():
 						# checagem se o nome já existe
 						if not self.gerente.container_existe(nome):
 						# se False
-							novo_container = Container(nome, nome_cenario)
+							print('Por padrão, não há limite na utilização de CPU.')
+							print('Limitar as CPU onde o container pode executar?')
+							cpus = input("Exemplo: '0-2' ou '1,3': ")
+
+							novo_container = Container(
+								nome_container=nome,
+								nome_cenario=nome_cenario, 
+								cpus=cpus)
+
 							self.criador.criar_server(novo_container)
 
 						# se True

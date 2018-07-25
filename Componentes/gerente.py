@@ -36,7 +36,7 @@ class Gerente():
 		res = self.cur.fetchall()
 
 		table = Texttable()
-		table.header(['Nome Container', 'IP', 'VNC', 'Emulador', 'Rede', 'Memória', 'Estado'])
+		table.header(['Nome Container', 'IP', 'VNC', 'Emulador', 'Rede', 'Memória', 'CPUS', 'Estado'])
 
 		for i in range(len(res)):
 			""" 
@@ -49,6 +49,7 @@ class Gerente():
 				6 -> estado
 				7 -> servidor ou não 
 				8 -> memoria
+				9 -> cpus
 			"""
 			
 			# coletando o IP do container
@@ -59,17 +60,19 @@ class Gerente():
 				vnc = 'localhost:%s' % str(res[i][2])
 				memory = res[i][8]
 				console_adb = 'emulator-%s' % str(res[i][3])
+				cpus = '---'
 			else:
 				vnc = 'NONE'
 				memory = 'NONE'
 				console_adb = 'NONE'
+				cpus = res[i][9]
 
 			# configurações de formatação da tabela
-			table.set_cols_width([12, 10, 15, 15, 5, 8, 15])
-			table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c'])
+			table.set_cols_width([12, 10, 15, 15, 5, 8, 5, 15])
+			table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c', 'c'])
 
 			# adiciona uma linha na tabela
-			table.add_row([res[i][1], ip, vnc, console_adb, res[i][5], memory, res[i][6]])
+			table.add_row([res[i][1], ip, vnc, console_adb, res[i][5], memory, cpus, res[i][6]])
 
 		# mostra a tabela
 		print(table.draw())
