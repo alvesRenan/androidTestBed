@@ -46,9 +46,11 @@ class Main_Script():
 		nome = input('Nome do novo cenário: ')
 		
 		# se False ele chama volta-se ao menu
-		if self.criador.criar_cenario(nome) == False:
+		# if self.criador.criar_cenario(nome) == False:
 			# self.criar_cenario()
-			self.menu()
+		#	self.menu()
+		self.criador.criar_cenario(nome)
+		self.menu()
 
 	def deleta_cenario(self):
 		os.system('clear')
