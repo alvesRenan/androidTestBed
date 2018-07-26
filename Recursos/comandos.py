@@ -28,8 +28,8 @@ SET_CLOUDLET = "adb -s emulator-%s shell am start -n %s --es 'cloudlet' '%s'"
 EXEC = "adb -s emulator-%s shell am start -n %s --es 'cloudlet' '%s' %s"
 
 # Coleta os dados de execucao do logcat e salva em um arquivo com o mesmo nome do container
-# Exemplo: adb -s emulator-5070 shell logcat -t | grep DebugRpc > file.txt
-RESULTS = "adb -s emulator-%s shell logcat -d | grep DebugRpc > %s"
+# Exemplo: adb -s emulator-5070 shell logcat -t | grep DebugRpc > diretorio/file.txt
+RESULTS = "adb -s emulator-%s shell logcat -d | grep DebugRpc > %s/%s"
 
 # Limpa o logcat do dispositivo
 # Exemplo: adb -s emulator-5070 shell logcat -c
@@ -61,7 +61,8 @@ START_MPOS = "cd /home/ ; java -jar mposplatform.jar"
 
 ###################################
 
+
 ##### OUTROS COMANDOS #####
 # Retorna o numero de linhas de um arquivo
-# Exemplo: wc -l android-2-1-lte | cut -f1 -d' '
-COUNT_LINES = "wc -l %s | cut -f1 -d' '"
+# Exemplo: wc -l diretorio/android-2-1-lte | cut -f1 -d' '
+COUNT_LINES = "wc -l %s/%s | cut -f1 -d' '"

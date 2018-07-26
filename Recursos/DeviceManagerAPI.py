@@ -10,23 +10,12 @@ import subprocess as sp
 
 class Android():
 
-	def __init__(self, nome, console, vnc, rede):
+	def __init__(self, nome, console, vnc, rede, time_stamp):
 		self.nome = nome
 		self.console = console
 		self.vnc = vnc
 		self.rede = rede
-
-	# def getNome(self):
-	# 	return self._nome
-
-	# def getConsole(self):
-	# 	return self._console
-
-	# def getVNC(self):
-	# 	return self._vnc
-
-	# def getRede(self):
-	# 	return self._rede
+		self.time_stamp = time_stamp
 
 	def start_app(self, activity, ip_cloudlet):
 		os.system(comandos.ACTIVITY % (self.console, activity))
@@ -49,11 +38,11 @@ class Android():
 			while True:
 				# captura dos resultados do logcat do dispositivo e escreve em um arquivo
 				# com o mesmo nome do container
-				self.getResults()
+				self.get_results()
 
 				try:
 					# retorna a quantidade de linhas do arquivo
-					lines = sp.getoutput(comandos.COUNT_LINES % self.nome)
+					lines = sp.getoutput(comandos.COUNT_LINES % (self.time_stamp, self.nome))
 					# se a quantidade for igual ao numero de repeticoes
 					# a acitvity ja foi executado e pode-se ir para a proxima interacao
 					if int(lines) == num_interacoes:
@@ -65,8 +54,8 @@ class Android():
 
 		print("Execucoes do dispositivo %s foram concluidas!" % self.nome)
 
-	def getResults(self):
-		os.system(comandos.RESULTS % (self.console, self.nome))
+	def get_results(self):
+		os.system(comandos.RESULTS % (self.console, self.time_stamp, self.nome))
 
 	def run(self, activity, ip_cloudlet, argumentos, repeticoes):
 		# time.sleep(random.randrange(1, 5))
@@ -80,7 +69,11 @@ class DeviceManager():
 		self.nome_cenario = nome_cenario
 		self.ip_cloudlet = ip_cloudlet
 
-	def getDevices(self):
+		# cria a pasta para guardar os arquivos de saida
+		self.time_stamp = time.strftime("%d-%m-%Y_%H:%M:%S")
+		os.mkdir(self.time_stamp)
+
+	def get_devices(self):
 		# conexão com a database
 		conn = sqlite3.connect('DB/mydb.db')
 		cur = conn.cursor()
@@ -94,20 +87,22 @@ class DeviceManager():
 		res = cur.fetchall()
 
 		for i in range(len(res)):
+			""" 
+				0 -> nome_cenario
+				1 -> nome_container
+				2 -> porta_6080
+				3 -> porta_5554
+				4 -> porta_5555
+				5 -> rede
+				6 -> estado
+				7 -> servidor ou não 
+				8 -> memoria
+				9 -> cpus
 			"""
-			 0 -> nome_cenario
-			 1 -> nome_container
-			 2 -> porta_6080
-			 3 -> porta do adb
-			 5 -> rede;
-			 6 -> estado
-			"""
-
-			console = res[i][3]
 			vnc = 'localhost:%s' % str(res[i][2])
 
 			# criação do objeto android
-			android = Android(res[i][1], console, vnc, res[i][6])
+			android = Android(res[i][1], res[i][3], vnc, res[i][5], self.time_stamp)
 
 			# lista com os dipositivos
 			self.devices.append(android)
@@ -122,7 +117,7 @@ class DeviceManager():
 		"""
 		 iniciar o app e definir a cloudlet
 		 exemplo: voce faz um for na lista de dispositivos e executa o metodo start_app para cada dispositivo na lista
-		 for device in api.getDevices(cenario):
+		 for device in api.get_devices(cenario):
 		 	api.start_app(device, activity, argumentos)
 		"""
 

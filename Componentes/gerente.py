@@ -62,9 +62,9 @@ class Gerente():
 				console_adb = 'emulator-%s' % str(res[i][3])
 				cpus = '---'
 			else:
-				vnc = 'NONE'
-				memory = 'NONE'
-				console_adb = 'NONE'
+				vnc = '---'
+				memory = '---'
+				console_adb = '---'
 				cpus = res[i][9]
 
 			# configurações de formatação da tabela
