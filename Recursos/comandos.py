@@ -13,7 +13,7 @@ LIST = "adb devices | awk 'NR>1 { print($1) }'"
 
 # Instala a aplicacao em dispositivo
 # exemplo: adb -s emulator-5070 install -rt App.apk
-INSTALL_APP = "adb -s emulator-%s install -rt %s"
+INSTALL_APP = "adb -s emulator-%s install -r -t %s"
 
 # Inicia a activity principal da aplicacao
 # Exemplo: adb -s emulator-5070 shell am start -S br.ufc.great.matrixoperation/.MainActivity
