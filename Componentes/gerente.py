@@ -117,7 +117,8 @@ class Gerente():
 		# nome nao existe
 		return False
 
-	def iniciar_emulador(self, lista_containers):
+	# inicia o servico do emulador ou do MpOs dependendo do tipo do container
+	def iniciar_servicos(self, lista_containers):
 		time.sleep(10)
 
 		for container in self.client.containers.list(all=True):
@@ -131,6 +132,15 @@ class Gerente():
 							container.exec_run(comandos.START_EMU % (i[1], i[3]), detach=True)
 						except:
 							pass
+					else:
+						# captura o ip do container
+						ip_servidor = sp.getoutput(comandos.GET_IP % i[0])
+						# forma um comando sed
+						cmd = comandos.MPOS_IP_CHANGE % ip_servidor
+						# configura o IP do container no arquivo de configuração do MpOS
+						container.exec_run("sh -c '%s'" % cmd)
+						# inicia o cloudlet
+						container.exec_run("sh -c '%s'" % comandos.START_MPOS, detach=True)
 
 	def iniciar_cenario(self, nome_cenario):
 		# retorna o nome e o tipo de rede de containers em estado PARADO ou CRIADO do cenário
@@ -146,23 +156,9 @@ class Gerente():
 			for i in resultado:
 				# posição 0 contém o nome do container a posição 1 contém o tipo de rede que ele deve usar
 				if i[0] == container.name:
-					# caso seja um container cliente
-					if i[2] == 0:
-						# inicia o container
-						container.restart()
-					# caso seja um container servidor
-					else:
-						# inicia o container
-						container.restart()
-						# captura o ip do container
-						ip_servidor = sp.getoutput(comandos.GET_IP % i[0])
-						# forma um comando sed
-						cmd = comandos.MPOS_IP_CHANGE % ip_servidor
-						# configura o IP do container no arquivo de configuração do MpOS
-						container.exec_run("sh -c '%s'" % cmd)
-						# inicia o cloudlet
-						container.exec_run("sh -c '%s'" % comandos.START_MPOS, detach=True)
-
+					# inicia o container
+					container.restart()
+					
 					# atualiza o estado do container no banco para EXECUTANDO
 					with self.conn:
 						try:
@@ -170,7 +166,7 @@ class Gerente():
 						except Exception as e:
 							raise e
 
-		self.iniciar_emulador(resultado)
+		self.iniciar_servicos(resultado)
 
 		# atualiza o estado cenario no banco para ATIVO
 		with self.conn:
@@ -247,5 +243,9 @@ class Gerente():
 
 					resultado = self.cur.fetchall()
 
-				print('Reiniciando o emulador no container %s' % nome_container)
-				self.iniciar_emulador(resultado)
+				if resultado[0][2] == 1:
+					print('Reiniciando o MpOS no container %s' % nome_container)
+				else:
+					print('Reiniciando o emulador no container %s' % nome_container)
+				
+				self.iniciar_servicos(resultado)
