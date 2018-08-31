@@ -57,7 +57,7 @@ MPOS_IP_CHANGE = 'cd /home/ ; sed -i "s/CHANGE/%s/" config.properties'
 MPOS_DEFAULT = 'cd /home/ ; sed -i "s/%s/CHANGE/ config.properties"'
 
 # Inicia o servidor MpOS
-START_MPOS = "cd /home/ ; java -jar mposplatform.jar"
+START_MPOS = "java -jar mposplatform.jar"
 
 ###################################
 

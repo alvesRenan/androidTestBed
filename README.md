@@ -17,7 +17,7 @@ Fazendo o download das Imagens:
 - Download da imagem do cliente:
    docker pull renanalves/android-testbed
 
-- Download da imagem do servidor:
+- Download da imagem do servidor (nova versão disponível):
    docker pull renanalves/server-testbed
 
 ## Utilizando a ferramenta
