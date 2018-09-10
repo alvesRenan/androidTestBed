@@ -17,19 +17,22 @@ INSTALL_APP = "adb -s emulator-%s install -r -t %s"
 
 # Inicia a activity principal da aplicacao
 # Exemplo: adb -s emulator-5070 shell am start -S br.ufc.great.matrixoperation/.MainActivity
-ACTIVITY = "adb -s emulator-%s shell am start -S %s"
+ACTIVITY = "adb -s emulator-%s shell am start -S %s > /dev/null"
 
 # Inicia a activity passando o IP do cloudlet
 # Exemplo: adb -s emulator-5070 shell am start -n br.ufc.great.matrixoperation/.MainActivity --es "cloudlet" "172.18.0.2"
-SET_CLOUDLET = "adb -s emulator-%s shell am start -n %s --es 'cloudlet' '%s'"
+SET_CLOUDLET = "adb -s emulator-%s shell am start -n %s --es 'cloudlet' '%s' > /dev/null"
 
 # Executa uma activity da aplicacao em um dispositivo passando o IP da cloudlet
-# exemplo: adb -s emulator-5070 shell am start -n br.ufc.great.matrixoperation/.MainActivity --es "cloudlet" "172.18.0.2" --es "operation" "mul" --ei "size" 500
-EXEC = "adb -s emulator-%s shell am start -n %s --es 'cloudlet' '%s' %s"
+# Exemplo: adb -s emulator-5570 shell am broadcast -a com.example.EXTRAS --es operation "mul" --ei size 500
+EXEC = "adb -s emulator-%s shell am broadcast -a %s %s > /dev/null"
 
 # Coleta os dados de execucao do logcat e salva em um arquivo com o mesmo nome do container
 # Exemplo: adb -s emulator-5070 shell logcat -t | grep DebugRpc > diretorio/file.txt
 RESULTS = "adb -s emulator-%s shell logcat -d | grep DebugRpc > %s/%s"
+
+# Coleda os logs de erro do app MAtrixOperationsKoltlin
+ERRORS = "adb -s emulator-%s shell logcat -d | grep 'An Error Occurred!' > %s/%s"
 
 # Limpa o logcat do dispositivo
 # Exemplo: adb -s emulator-5070 shell logcat -c

@@ -18,10 +18,12 @@ class Android():
 		self.time_stamp = time_stamp
 
 	def start_app(self, activity, ip_cloudlet):
+		# Inicia o app
 		os.system(comandos.ACTIVITY % (self.console, activity))
+		# Define o IP da cloudlet
 		os.system(comandos.SET_CLOUDLET % (self.console, activity, ip_cloudlet))
 
-	def exec_run(self, activity, ip_cloudlet, argumentos, repeticoes):
+	def exec_run(self, action, ip_cloudlet, argumentos, repeticoes):
 		# limpa o logcat para remover resultados de experimentos anteriores
 		os.system(comandos.CLEAR_LOG % self.console)
 
@@ -32,7 +34,7 @@ class Android():
 			print("Interacao numero %i do dispositivo %s" % (num_interacoes, self.nome))
 
 			# chamada da activity
-			os.system(comandos.EXEC % (self.console, activity, ip_cloudlet, argumentos))
+			os.system(comandos.EXEC % (self.console, action, argumentos))
 
 			# loop para esperar os resultados
 			while True:
@@ -56,11 +58,12 @@ class Android():
 
 	def get_results(self):
 		os.system(comandos.RESULTS % (self.console, self.time_stamp, self.nome))
+		os.system(comandos.ERRORS % (self.console, self.time_stamp, 'errors-' + self.nome))
 
-	def run(self, activity, ip_cloudlet, argumentos, repeticoes):
+	def run(self, action, ip_cloudlet, argumentos, repeticoes):
 		# time.sleep(random.randrange(1, 5))
 
-		android_thread = threading.Thread(target=self.exec_run, args=(activity, ip_cloudlet, argumentos, repeticoes,))
+		android_thread = threading.Thread(target=self.exec_run, args=(action, ip_cloudlet, argumentos, repeticoes,))
 		android_thread.start()
 
 class DeviceManager():
@@ -78,7 +81,7 @@ class DeviceManager():
 		conn = sqlite3.connect('DB/mydb.db')
 		cur = conn.cursor()
 
-		self.devices = []
+		devices = []
 
 		# seleção dos dispositivos que fazem parte do cenário e estão ativos
 		cur.execute('SELECT * FROM containers WHERE nome_cenario = :nome AND estado_container = :estado AND is_server = 0',
@@ -105,23 +108,17 @@ class DeviceManager():
 			android = Android(res[i][1], res[i][3], vnc, res[i][5], self.time_stamp)
 
 			# lista com os dipositivos
-			self.devices.append(android)
+			devices.append(android)
 
 		# encerra a conexão
 		conn.close()
 
 		# retorna a lista com objetos
-		return self.devices
+		return devices
 
 	def start_app(self, android, activity):
-		"""
-		 iniciar o app e definir a cloudlet
-		 exemplo: voce faz um for na lista de dispositivos e executa o metodo start_app para cada dispositivo na lista
-		 for device in api.get_devices(cenario):
-		 	api.start_app(device, activity, argumentos)
-		"""
-
 		android.start_app(activity, self.ip_cloudlet)
+		print("Stated activity {} on device {}".format(activity, androi.nome))
 
-	def exec_activity(self, android, activity, argumentos, repeticoes):
-		android.run(activity, self.ip_cloudlet, argumentos, repeticoes)
+	def exec_activity(self, android, action, argumentos, repeticoes):
+		android.run(action, self.ip_cloudlet, argumentos, repeticoes)

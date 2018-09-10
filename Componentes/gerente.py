@@ -32,7 +32,7 @@ class Gerente():
 
 	# cria a tabela de listagem dos containers
 	def listar_containers(self, nome_cenario):
-		self.cur.execute('SELECT * FROM containers WHERE nome_cenario = :nome', { 'nome': nome_cenario })
+		self.cur.execute('SELECT * FROM containers WHERE nome_cenario = ? ORDER BY nome_container', (nome_cenario,))
 		res = self.cur.fetchall()
 
 		table = Texttable()
