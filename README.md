@@ -30,5 +30,5 @@ https://youtu.be/uZj6Gl6R19Q
 O passo a passo para a utilização da ferramenta e também como ela está estrutura podem ser visto no link abaixo:
 http://www.repositorio.ufc.br/bitstream/riufc/29546/1/2017_tcc_rabarbosa.pdf
 
-Repositório do aplicativo MatrixOperationsKotlin:
+Repositório do aplicativo MatrixOperationsKotlin (nova versão disponível):
 https://github.com/alvesRenan/KotlinMpOS
