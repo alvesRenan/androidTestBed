@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import time
 import docker
 import sqlite3
@@ -36,7 +37,7 @@ class Gerente():
 		res = self.cur.fetchall()
 
 		table = Texttable()
-		table.header(['Nome Container', 'IP', 'VNC', 'Emulador', 'Rede', 'Memória', 'CPUS', 'Estado'])
+		table.header(['Nome Container', 'VNC', 'Emulador', 'Rede', 'Memória', 'CPUS', 'Estado'])
 
 		for i in range(len(res)):
 			""" 
@@ -51,9 +52,6 @@ class Gerente():
 				8 -> memoria
 				9 -> cpus
 			"""
-			
-			# coletando o IP do container
-			ip = sp.getoutput(comandos.GET_IP % res[i][1])
 
 			if res[i][7] == 0:
 				# criando o edereço para o noVNC
@@ -68,11 +66,11 @@ class Gerente():
 				cpus = res[i][9]
 
 			# configurações de formatação da tabela
-			table.set_cols_width([12, 10, 15, 15, 5, 8, 5, 15])
-			table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c', 'c'])
+			table.set_cols_width([12, 15, 15, 5, 8, 5, 15])
+			table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c'])
 
 			# adiciona uma linha na tabela
-			table.add_row([res[i][1], ip, vnc, console_adb, res[i][5], memory, cpus, res[i][6]])
+			table.add_row([res[i][1], vnc, console_adb, res[i][5], memory, cpus, res[i][6]])
 
 		# mostra a tabela
 		print(table.draw())
@@ -104,6 +102,12 @@ class Gerente():
 
 	# checa se o container existe
 	def container_existe(self, nome_container):
+		# o nome deve seguir as seguintes restrições
+		regex = re.match('[a-zA-Z0-9][a-zA-Z0-9_.-]', nome_container)
+		if regex == None:
+			# em caso negativo
+			return True
+
 		# coloca o nome em formato de tupla para comparacao futura
 		nome = (nome_container,)
 		self.cur.execute("SELECT nome_container FROM containers")

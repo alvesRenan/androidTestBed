@@ -64,7 +64,9 @@ class Main_Script():
 
 	def config_cenario(self):
 		sair = False
-		nome_cenario = input('Digite o nome do cenário: ')
+		os.system('clear')
+		self.gerente.listar_cenarios()
+		nome_cenario = input('Digite o nome do cenário que será configurado: ')
 
 		os.system('clear')
 
@@ -130,7 +132,7 @@ class Main_Script():
 
 						# se True
 						else:
-							print('O nome já existe!')
+							print('Nome não permitido ou container já existe!')
 
 						# fim do loop
 						check = True
@@ -156,7 +158,7 @@ class Main_Script():
 
 						# se True
 						else:
-							print('O nome já existe!')
+							print('Nome não permitido ou container já existe!')
 
 						# fim do loop
 						check = True

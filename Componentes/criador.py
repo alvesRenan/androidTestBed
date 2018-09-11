@@ -16,34 +16,28 @@ class Criador():
 		self.cur = self.conn.cursor()
 		# tantativa de criacao da tabela containers e cenarios
 		with self.conn:
-			try:
-				self.cur.execute(
-					"""CREATE TABLE containers (
-							nome_cenario text,
-							nome_container text,
-							porta_6080 integer,
-							porta_5554 integer,
-							porta_5555 integer,
-							rede text,
-							estado_container text default 'CRIADO',
-							is_server integer default 0,
-							memory text,
-							cpus text
-						)"""
-					)
-			except:
-				pass
+			self.cur.execute(
+				"""CREATE TABLE IF NOT EXISTS  containers (
+						nome_cenario text,
+						nome_container text,
+						porta_6080 integer,
+						porta_5554 integer,
+						porta_5555 integer,
+						rede text,
+						estado_container text default 'CRIADO',
+						is_server integer default 0,
+						memory text,
+						cpus text
+					)"""
+				)
 
-		with self.conn:
-			try:
-				self.cur.execute(
-					"""CREATE TABLE cenarios(
-							nome_cenario text,
-							estado_cenario text default 'PARADO'
-						)"""
-					)
-			except:
-				pass
+			self.cur.execute(
+				"""CREATE TABLE IF NOT EXISTS cenarios(
+						nome_cenario text,
+						estado_cenario text default 'PARADO'
+					)"""
+				)
+
 		# procurar as maiores portas em uso e definindo o valor das portas para novos containers
 		self.cur.execute('SELECT MAX(porta_6080) FROM containers')
 		resposta = self.cur.fetchone()
