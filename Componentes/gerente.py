@@ -36,7 +36,7 @@ class Gerente():
 		self.cur.execute('SELECT * FROM containers WHERE nome_cenario = ? ORDER BY nome_container', (nome_cenario,))
 		res = self.cur.fetchall()
 
-		table = Texttable()
+		table = Texttable(max_width=0)
 		table.header(['Nome Container', 'VNC', 'Emulador', 'Rede', 'Memória', 'CPUS', 'Estado'])
 
 		for i in range(len(res)):
@@ -66,7 +66,7 @@ class Gerente():
 				cpus = res[i][9]
 
 			# configurações de formatação da tabela
-			table.set_cols_width([12, 15, 15, 5, 8, 5, 15])
+			# table.set_cols_width([12, 15, 15, 5, 8, 5, 15])
 			table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c'])
 
 			# adiciona uma linha na tabela
