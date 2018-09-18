@@ -118,7 +118,7 @@ class DeviceManager():
 
 	def start_app(self, android, activity):
 		android.start_app(activity, self.ip_cloudlet)
-		print("Stated activity {} on device {}".format(activity, androi.nome))
+		print("Stated activity {} on device {}".format(activity, android.nome))
 
 	def exec_activity(self, android, action, argumentos, repeticoes):
 		android.run(action, self.ip_cloudlet, argumentos, repeticoes)

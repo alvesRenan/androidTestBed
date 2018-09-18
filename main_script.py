@@ -105,7 +105,6 @@ class Main_Script():
 
 							rede = input('Digite o nome da rede a ser usada: ')
 							if rede not in regex:
-								os.system('clear')
 								print('Rede não compatível! Utilizando rede padrão \'full\'')
 								rede = 'full'
 								# self.gerente.listar_containers(nome_cenario)
