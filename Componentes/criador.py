@@ -109,7 +109,7 @@ class Criador():
 					cap_add=['NET_ADMIN'],
 					detach=True,
 					privileged=True,
-					network='isolated_nw',
+					# network='isolated_nw',
 					publish_all_ports=True,
 					name=novo_container.nome,
 					ports={

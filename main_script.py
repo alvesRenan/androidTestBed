@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import Recursos.comandos as comandos
 from Componentes.criador import Criador
 from Componentes.gerente import Gerente
@@ -101,14 +102,12 @@ class Main_Script():
 						# se False
 							
 							print('Configurações de rede disponíveis: umts, lte, full')
-							regex = ['umts', 'lte', 'full']
+							rede = input('Digite o nome da rede a ser usada ou defina o valor em kbps (Ex: 620.0): ')
+							regex = re.match('lte|umts|full|[0-9]', rede)
 
-							rede = input('Digite o nome da rede a ser usada: ')
-							if rede not in regex:
+							if regex == None:
 								print('Rede não compatível! Utilizando rede padrão \'full\'')
 								rede = 'full'
-								# self.gerente.listar_containers(nome_cenario)
-								# self.config_cenario()
 
 							print('Configuração de memória RAM (em MB) do dispositivo (valor padrão 512 MBs)')
 							memory = input('Digite a quantidade de memória do dispositivo: ')

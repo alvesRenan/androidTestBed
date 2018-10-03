@@ -37,7 +37,7 @@ class Gerente():
 		res = self.cur.fetchall()
 
 		table = Texttable(max_width=0)
-		table.header(['Nome Container', 'VNC', 'Emulador', 'Rede', 'Memória', 'CPUS', 'Estado'])
+		table.header(['Nome Container', 'VNC', 'Emulador', 'Rede/Speed', 'Memória', 'CPUS', 'Estado'])
 
 		for i in range(len(res)):
 			""" 
