@@ -129,7 +129,8 @@ class Criador():
 
 	def  criar_server(self, novo_container):
 		self.client.containers.run(
-			'renanalves/server-testbed',
+			# 'renanalves/server-testbed',
+			'renanalves/server-testbed-source-afis',
 			detach=True,
 			tty=True,
 			stdin_open=True,
@@ -148,7 +149,8 @@ class Criador():
 				'40006/tcp': 40006,
 				'40010/tcp': 40010,
 				'40011/tcp': 40011,
-				'40020/tcp': 40020
+				'40020/tcp': 40020,
+				'36619/tcp': 36619
 			},
 			publish_all_ports=True,
 			cap_add=['NET_ADMIN'],

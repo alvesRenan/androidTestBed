@@ -3,7 +3,7 @@
 from Recursos.DeviceManagerAPI import DeviceManager
 import time
 
-dm = DeviceManager("teste", "172.17.0.3")
+dm = DeviceManager("t", "192.168.2.111")
 
 devices = dm.get_devices()
 
@@ -14,4 +14,4 @@ print("Connecting....")
 time.sleep(5)
 
 for android in devices:
-	dm.exec_activity(android, "benchimage2.EXTRAS", "--ei size 4 --ei filter 2 --ei local 1", 1)
+	dm.exec_activity(android, "benchimage2.EXTRAS", "--ei size 4 --ei filter 2 --ei local 1", 20)

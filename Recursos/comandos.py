@@ -52,12 +52,12 @@ GET_IP = "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{
 START_EMU = "sh -c 'emulator @nexus_5_5.1.1 -gpu off -no-boot-anim -accel auto -netspeed %s -memory %s'"
 
 # Adiciona o IP do container no arquivo config.properties, substituindo o IP padrao
-MPOS_IP_CHANGE = 'cd /home/ ; sed -i "s/CHANGE/%s/" config.properties'
+MPOS_IP_CHANGE = "cd /home/ ; sed -i 's/CHANGE/%s/' config.properties"
 
 # Adiciona um campo padrao no local do IP no arquivo config.properties,
 # substituindo o IP corrente pelo valor 'CHANGE' para facilitar a mudanca na proxima execucao
 # Exemplo: sed -i "s/172.18.0.2/CHANGE/" config.properties
-MPOS_DEFAULT = 'cd /home/ ; sed -i "s/%s/CHANGE/ config.properties"'
+MPOS_DEFAULT = "cd /home/ ; sed -i 's/%s/CHANGE/' config.properties"
 
 # Inicia o servidor MpOS
 START_MPOS = "java -jar mposplatform.jar"
