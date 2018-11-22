@@ -129,13 +129,11 @@ class Criador():
 
 	def  criar_server(self, novo_container):
 		self.client.containers.run(
-			# 'renanalves/server-testbed',
-			'renanalves/server-testbed-source-afis',
+			'renanalves/server-testbed',
 			detach=True,
 			tty=True,
 			stdin_open=True,
 			privileged=True,
-			# network = 'isolated_nw',
 			ports={
 				'30015/tcp': 30015,
 				'31000/tcp': 31000,
