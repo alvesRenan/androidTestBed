@@ -146,7 +146,7 @@ class Gerente():
 						# inicia o cloudlet
 						container.exec_run("sh -c '%s'" % comandos.START_MPOS, detach=True)
 
-					else:
+					if i[2] == 2:
 						self.configure_nginx(i[0], nome_cenario)
 
 
