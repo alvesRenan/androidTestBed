@@ -279,7 +279,7 @@ class Gerente():
 		stream = nginx.Stream()
 
 		self.cur.execute("SELECT nome_container FROM containers WHERE is_server = ? AND nome_cenario = ?",
-			(1, nome_cenario))
+			(2, nome_cenario))
 
 		server_ips = []
 		for container in self.cur.fetchall():
