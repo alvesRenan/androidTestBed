@@ -5,6 +5,7 @@ import re
 import time
 import docker
 import sqlite3
+import nginx
 import Recursos.comandos as comandos
 import subprocess as sp
 from texttable import Texttable
@@ -37,7 +38,7 @@ class Gerente():
 		res = self.cur.fetchall()
 
 		table = Texttable(max_width=0)
-		table.header(['Nome Container', 'VNC', 'Emulador', 'Rede/Speed', 'Memória', 'CPUS', 'Estado'])
+		table.header(['Nome Container', 'VNC', 'Emulador', 'IP', 'Rede/Speed', 'Memória', 'CPUS', 'Estado'])
 
 		for i in range(len(res)):
 			""" 
@@ -65,12 +66,11 @@ class Gerente():
 				console_adb = '---'
 				cpus = res[i][9]
 
-			# configurações de formatação da tabela
-			# table.set_cols_width([12, 15, 15, 5, 8, 5, 15])
-			table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c'])
+			ip = sp.getoutput(comandos.GET_IP % res[i][1])
 
-			# adiciona uma linha na tabela
-			table.add_row([res[i][1], vnc, console_adb, res[i][5], memory, cpus, res[i][6]])
+			# configurações de formatação da tabela
+			table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c', 'c'])
+			table.add_row([res[i][1], vnc, console_adb, ip, res[i][5], memory, cpus, res[i][6]])
 
 		# mostra a tabela
 		print(table.draw())
@@ -122,7 +122,7 @@ class Gerente():
 		return False
 
 	# inicia o servico do emulador ou do MpOs dependendo do tipo do container
-	def iniciar_servicos(self, lista_containers):
+	def iniciar_servicos(self, lista_containers, nome_cenario):
 		time.sleep(10)
 
 		for container in self.client.containers.list(all=True):
@@ -136,7 +136,7 @@ class Gerente():
 							container.exec_run(comandos.START_EMU % (i[1], i[3]), detach=True)
 						except:
 							pass
-					else:
+					if i[2] == 1:
 						# captura o ip do container
 						ip_servidor = sp.getoutput(comandos.GET_IP % i[0])
 						# forma um comando sed
@@ -145,6 +145,10 @@ class Gerente():
 						container.exec_run("sh -c '%s'" % cmd)
 						# inicia o cloudlet
 						container.exec_run("sh -c '%s'" % comandos.START_MPOS, detach=True)
+
+					else:
+						self.configure_nginx(i[0], nome_cenario)
+
 
 	def iniciar_cenario(self, nome_cenario):
 		# retorna o nome e o tipo de rede de containers em estado PARADO ou CRIADO do cenário
@@ -170,7 +174,7 @@ class Gerente():
 						except Exception as e:
 							raise e
 
-		self.iniciar_servicos(resultado)
+		self.iniciar_servicos(resultado, nome_cenario)
 
 		# atualiza o estado cenario no banco para ATIVO
 		with self.conn:
@@ -217,7 +221,6 @@ class Gerente():
 			except Exception as e:
 				raise e # Latest commit a9494d7  4 days ago
 
-
 	# conexão com os emuladores pelo adb
 	def conectar_dispositivos(self, nome_cenario):
 		os.system(comandos.ADB_KILL)
@@ -253,3 +256,55 @@ class Gerente():
 					print('Reiniciando o emulador no container %s' % nome_container)
 				
 				self.iniciar_servicos(resultado)
+
+	def configure_nginx(self, nome_container, nome_cenario):
+		# Lista com o servircos do MpOS e as portas
+		# Em caso de deploy de um novo app, adicione o Nome e a porta aqui
+		services = {
+			'PingTcpServer': '40000',
+			'PingUdpServer': '40001',
+			'JitterUdpServer': '40005',
+			'DeployAppTcpServer': '40020',
+			'BandwidthTcpServer': '40010',
+			'PersistenceTcpServer': '40011',
+			'JitterRetrieveTcpServer': '40006',
+			'RpcTcpServer_benchImage2': '36114',
+			'DiscoveryServiceTcpServer': '30015',
+			'DiscoveryMulticastService': '31000',
+			'RpcTcpServer_matrixOperations': '36415',
+			'RpcTcpServer_kotlin_matrixOperations': '36241'
+		}
+
+		conf = nginx.Conf()
+		stream = nginx.Stream()
+
+		self.cur.execute("SELECT nome_container FROM containers WHERE is_server = ? AND nome_cenario = ?",
+			(1, nome_cenario))
+
+		server_ips = []
+		for container in self.cur.fetchall():
+			server_ips.append(sp.getoutput(comandos.GET_IP % container))
+
+		for service_name, port in services.items():
+			upstream = nginx.Upstream(service_name)
+			for ip in server_ips:
+				upstream.add(
+					nginx.Key(
+						'server', '{}:{}'.format(ip, port)))
+
+			server = nginx.Server()
+			server.add(
+				nginx.Key('listen', port),
+				nginx.Key('proxy_pass', service_name))
+
+			stream.add(upstream, server)
+
+		conf.add(stream)
+
+		sp.call('cp Recursos/nginx.conf.org Recursos/nginx.conf', shell=True)
+		with open('Recursos/nginx.conf', 'a') as file:
+			nginx.dump(conf, file)
+		
+		sp.call('docker cp Recursos/nginx.conf %s:/etc/nginx/nginx.conf' % nome_container, shell=True)
+		sp.call('docker exec %s bash -c "nginx -s reload"' % nome_container, shell=True)
+		sp.call('rm Recursos/nginx.conf', shell=True)

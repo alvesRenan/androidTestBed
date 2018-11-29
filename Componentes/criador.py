@@ -127,34 +127,46 @@ class Criador():
 				print(e)
 				return 0
 
-	def  criar_server(self, novo_container):
-		self.client.containers.run(
-			'renanalves/server-testbed',
-			detach=True,
-			tty=True,
-			stdin_open=True,
-			privileged=True,
-			ports={
-				'30015/tcp': 30015,
-				'31000/tcp': 31000,
-				'36114/tcp': 36114,
-				'36381/tcp': 36381,
-				'36415/tcp': 36415,
-				'36241/tcp': 36241,
-				'40000/tcp': 40000,
-				'40001/tcp': 40001,
-				'40005/tcp': 40005,
-				'40006/tcp': 40006,
-				'40010/tcp': 40010,
-				'40011/tcp': 40011,
-				'40020/tcp': 40020,
-				'36619/tcp': 36619
-			},
-			publish_all_ports=True,
-			cap_add=['NET_ADMIN'],
-			name=novo_container.nome,
-			cpuset_cpus=novo_container.cpus
-		)
+	def criar_server(self, novo_container, bind_ports=True):
+		if bind_ports:
+			self.client.containers.run(
+				'renanalves/server-testbed',
+				detach=True,
+				tty=True,
+				stdin_open=True,
+				privileged=True,
+				ports={
+					'30015/tcp': 30015,
+					'31000/tcp': 31000,
+					'36114/tcp': 36114,
+					'36381/tcp': 36381,
+					'36415/tcp': 36415,
+					'36241/tcp': 36241,
+					'40000/tcp': 40000,
+					'40001/tcp': 40001,
+					'40005/tcp': 40005,
+					'40006/tcp': 40006,
+					'40010/tcp': 40010,
+					'40011/tcp': 40011,
+					'40020/tcp': 40020,
+					'36619/tcp': 36619
+				},
+				publish_all_ports=True,
+				cap_add=['NET_ADMIN'],
+				name=novo_container.nome,
+				cpuset_cpus=novo_container.cpus
+			)
+		else:
+			self.client.containers.run(
+				'renanalves/server-testbed',
+				detach=True,
+				tty=True,
+				stdin_open=True,
+				privileged=True,
+				cap_add=['NET_ADMIN'],
+				name=novo_container.nome,
+				cpuset_cpus=novo_container.cpus
+			)
 
 		with self.conn:
 			try: 
@@ -165,6 +177,19 @@ class Criador():
 
 			except Exception as e:
 				print(e)
+
+	def criar_nginx(self, novo_container):
+		self.client.containers.run('nginx',detach=True, name=novo_container.nome)
+
+		with self.conn:
+			try:
+				self.cur.execute(
+					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, is_server, cpus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+					(novo_container.cenario, novo_container.nome, None, None, None, None, 2, None)
+				)
+
+			except Exception as e:
+				print(e)	
 
 	def deleta_container(self, nome_container):
 		for container in self.client.containers.list(all=True):

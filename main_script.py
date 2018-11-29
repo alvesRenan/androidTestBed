@@ -2,7 +2,6 @@
 
 import os
 import re
-import Recursos.comandos as comandos
 from Componentes.criador import Criador
 from Componentes.gerente import Gerente
 from Recursos.class_container import Container
@@ -45,12 +44,8 @@ class Main_Script():
 
 	def criar_cenario(self):
 		nome = input('Nome do novo cenário: ')
-		
-		# se False ele chama volta-se ao menu
-		# if self.criador.criar_cenario(nome) == False:
-			# self.criar_cenario()
-		#	self.menu()
 		self.criador.criar_cenario(nome)
+		
 		self.menu()
 
 	def deleta_cenario(self):
@@ -74,8 +69,6 @@ class Main_Script():
 		# caso retorne False quer dizer que o cenário já existe, caso contrário deve ser usada a opção 'Criar cenário'
 		if not self.gerente.cenario_existe(nome_cenario):
 			while not sair:
-				check = False
-
 				print('=======================================')
 				print('Opções de Cenários:')
 				print('1 -> Adicionar cliente')
@@ -87,79 +80,74 @@ class Main_Script():
 				print('8 -> Iniciar cenário')
 				print('9 -> Parar cenário')
 				print('10 -> Reiniciar um container cliente')
+				print('11 -> Criar continer NGINX')
 				print('0 -> Voltar para o menu principal')
 				print('=======================================')
 				option = input('>> ')
 
 				# carcterísticas do container cliente que será criado
 				if option == '1':
-					while not check:
-						#tipo = 'cliente'
-						nome = input('Digite o nome do container: ')
+					nome = input('Digite o nome do container: ')
+					
+					# checagem se o nome já existe
+					if not self.gerente.container_existe(nome):
+					# se False
 						
-						# checagem se o nome já existe
-						if not self.gerente.container_existe(nome):
-						# se False
-							
-							print('Configurações de rede disponíveis: umts, lte, full')
-							rede = input('Digite o nome da rede a ser usada ou defina o valor em kbps (Ex: 620.0): ')
-							regex = re.match('lte|umts|full|[0-9]', rede)
+						print('Configurações de rede disponíveis: umts, lte, full')
+						rede = input('Digite o nome da rede a ser usada ou defina o valor em kbps (Ex: 620.0): ')
+						regex = re.match('lte|umts|full|[0-9]', rede)
 
-							if regex == None:
-								print('Rede não compatível! Utilizando rede padrão \'full\'')
-								rede = 'full'
+						if regex == None:
+							print('Rede não compatível! Utilizando rede padrão \'full\'')
+							rede = 'full'
 
-							print('Configuração de memória RAM (em MB) do dispositivo (valor padrão 512 MBs)')
-							memory = input('Digite a quantidade de memória do dispositivo: ')
+						print('Configuração de memória RAM (em MB) do dispositivo (valor padrão 512 MBs)')
+						memory = input('Digite a quantidade de memória do dispositivo: ')
 
-							try:
-								if int(memory) < 512:
-									memory = '512'
-							except:
-								print("Valor inválido, utilizando valor padrão.")
+						try:
+							if int(memory) < 512:
 								memory = '512'
+						except:
+							print("Valor inválido, utilizando valor padrão.")
+							memory = '512'
 
-							# criação do objeto Container
-							novo_container = Container(
-								nome_container=nome,
-								nome_cenario=nome_cenario,
-								memory=memory)
-							# cria o container e insere no banco de dados
-							self.criador.criar_cliente(novo_container, rede)
-							
-
-						# se True
-						else:
-							print('Nome não permitido ou container já existe!')
-
-						# fim do loop
-						check = True
+						# criação do objeto Container
+						novo_container = Container(
+							nome_container=nome,
+							nome_cenario=nome_cenario,
+							memory=memory)
+						# cria o container e insere no banco de dados
+						self.criador.criar_cliente(novo_container, rede)
+						
+					# se True
+					else:
+						print('Nome não permitido ou container já existe!')
 
 				if option == '2':
-					while not check:
-						#tipo = 'server'
-						nome = input('Digite o nome do container: ')
+					nome = input('Digite o nome do container: ')
 
-						# checagem se o nome já existe
-						if not self.gerente.container_existe(nome):
-						# se False
-							print('Por padrão, não há limite na utilização de CPU.')
-							print('Limitar as CPU onde o container pode executar?')
-							cpus = input("Exemplo: '0-2' ou '1,3': ")
+					# checagem se o nome já existe
+					if not self.gerente.container_existe(nome):
+					# se False
+						print('Por padrão, não há limite na utilização de CPU.')
+						print('Limitar as CPU onde o container pode executar?')
+						cpus = input("Exemplo: '0-2' ou '1,3': ")
+						novo_container = Container(
+							nome_container=nome,
+							nome_cenario=nome_cenario, 
+							cpus=cpus)
 
-							novo_container = Container(
-								nome_container=nome,
-								nome_cenario=nome_cenario, 
-								cpus=cpus)
+						bind_ports = input("Fazer o bind das portas? (S)im/(N)ão (Fazer o bind das portas impede que mais de um container servidor seja criado): ")
 
+						if bind_ports.lower() == 'n':
+							self.criador.criar_server(novo_container, False)
+							print("Após criar todos os servidores não esqueça de criar um container NGINX!")
+						else:
 							self.criador.criar_server(novo_container)
 
-						# se True
-						else:
-							print('Nome não permitido ou container já existe!')
-
-						# fim do loop
-						check = True
+					# se True
+					else:
+						print('Nome não permitido ou container já existe!')
 
 				if option == '3':
 					os.system('clear')
@@ -196,6 +184,15 @@ class Main_Script():
 					
 					else:
 						print('Container não existe!')
+
+				if option == '11':
+					nome = input('Digite o nome do container: ')
+					
+					if not self.gerente.container_existe(nome):
+						novo_container = Container(nome, nome_cenario)
+						self.criador.criar_nginx(novo_container)
+					else:
+						print("Nome não permitido ou container já existe!")
 
 				if option == '0':
 					sair = True
