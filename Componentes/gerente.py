@@ -58,7 +58,7 @@ class Gerente():
 				# criando o edereço para o noVNC
 				vnc = 'localhost:%s' % str(res[i][2])
 				memory = res[i][8]
-				console_adb = 'emulator-%s' % str(res[i][3])
+				console_adb = '%s' % str(res[i][3])
 				cpus = '---'
 			else:
 				vnc = '---'
@@ -123,8 +123,6 @@ class Gerente():
 
 	# inicia o servico do emulador ou do MpOs dependendo do tipo do container
 	def iniciar_servicos(self, lista_containers, nome_cenario):
-		time.sleep(10)
-
 		for container in self.client.containers.list(all=True):
 			for i in lista_containers:
 				# posição 0 contém o nome do container a posição 1 contém o tipo de rede que ele deve usar
@@ -148,7 +146,6 @@ class Gerente():
 
 					if i[2] == 2:
 						self.configure_nginx(i[0], nome_cenario)
-
 
 	def iniciar_cenario(self, nome_cenario):
 		# retorna o nome e o tipo de rede de containers em estado PARADO ou CRIADO do cenário
@@ -237,12 +234,9 @@ class Gerente():
 			saida = os.system(comandos.INSTALL_APP % (i, apk))
 			print(saida)
 
-	def restart_container(self, nome_container):
+	def restart_container(self, nome_container, nome_cenario):
 		for container in self.client.containers.list():
 			if container.name == nome_container:
-				print('Reiniciando o container %s' % nome_container)
-				container.restart()
-
 				with self.conn:
 					self.cur.execute(
 						'SELECT nome_container, rede, is_server, memory FROM containers WHERE nome_container = ? AND estado_container = ?',
@@ -250,12 +244,21 @@ class Gerente():
 
 					resultado = self.cur.fetchall()
 
-				if resultado[0][2] == 1:
-					print('Reiniciando o MpOS no container %s' % nome_container)
-				else:
-					print('Reiniciando o emulador no container %s' % nome_container)
+				if resultado[0][2] == 0 or resultado[0][2] == 1:
+					container.restart()
+
+				print('Restarting container %s' % nome_container)
+
+				self.iniciar_servicos(resultado, nome_cenario)
 				
-				self.iniciar_servicos(resultado)
+				# if resultado[0][2] == 0:
+				# 	print('Restarting emulador on container %s' % nome_container)
+				# elif resultado[0][2] == 1:
+				# 	print('Restarting MpOS on container %s' % nome_container)
+
+				# if resultado[0][2] == 2:
+				# 	print('Restarting Nginx on container %s' % nome_container)
+				
 
 	def configure_nginx(self, nome_container, nome_cenario):
 		# Lista com o servircos do MpOS e as portas
@@ -308,3 +311,6 @@ class Gerente():
 		sp.call('docker cp Recursos/nginx.conf %s:/etc/nginx/nginx.conf' % nome_container, shell=True)
 		sp.call('docker exec %s bash -c "nginx -s reload"' % nome_container, shell=True)
 		sp.call('rm Recursos/nginx.conf', shell=True)
+
+	def update_cpus(self, nome_container, qtd_cpus):
+		sp.call("docker update --cpus='%s' %s" % (qtd_cpus, nome_container), shell=True)

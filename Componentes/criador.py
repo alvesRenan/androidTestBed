@@ -21,7 +21,7 @@ class Criador():
 						nome_cenario text,
 						nome_container text,
 						porta_6080 integer,
-						porta_5554 integer,
+						porta_5554 text,
 						porta_5555 integer,
 						rede text,
 						estado_container text default 'CRIADO',
@@ -51,7 +51,8 @@ class Criador():
 		if resposta[0] == None:
 			self.porta_5554 = 5554
 		else:
-			self.porta_5554 = resposta[0] + 2
+			_, port_5554 = resposta[0].split('-')
+			self.porta_5554 = int(port_5554) + 2
 
 		self.cur.execute('SELECT MAX(porta_5555) FROM containers')
 		resposta = self.cur.fetchone()
@@ -101,7 +102,7 @@ class Criador():
 			try:
 				self.cur.execute(
 					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory, cpus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-					(novo_container.cenario, novo_container.nome, self.porta_6080, self.porta_5554, self.porta_5555, rede, novo_container.memory, novo_container.cpus)
+					(novo_container.cenario, novo_container.nome, self.porta_6080, "emulator-{}".format(self.porta_5554), self.porta_5555, rede, novo_container.memory, novo_container.cpus)
 				)
 
 				self.client.containers.run(
@@ -154,7 +155,7 @@ class Criador():
 				publish_all_ports=True,
 				cap_add=['NET_ADMIN'],
 				name=novo_container.nome,
-				cpuset_cpus=novo_container.cpus
+				# cpuset_cpus=novo_container.cpus
 			)
 		else:
 			self.client.containers.run(
@@ -165,8 +166,11 @@ class Criador():
 				privileged=True,
 				cap_add=['NET_ADMIN'],
 				name=novo_container.nome,
-				cpuset_cpus=novo_container.cpus
+				# cpuset_cpus=novo_container.cpus
 			)
+
+		if not novo_container.cpus == "":
+			self.gerente.update_cpus(novo_container.nome, novo_container.cpus)
 
 		with self.conn:
 			try: 
@@ -200,3 +204,9 @@ class Criador():
 				with self.conn:
 					self.cur.execute('DELETE FROM containers WHERE nome_container = :nome', {'nome': nome_container})
 
+	def add_real_device(self, device_name, cenario):
+		with self.conn:
+			self.cur.execute(
+					"INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory, cpus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+					(cenario, device_name, None, device_name, None, None, None, None)
+				)

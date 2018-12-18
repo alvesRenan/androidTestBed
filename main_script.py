@@ -17,11 +17,11 @@ class Main_Script():
 
 	def menu(self):
 		print('===================================================')
-		print('1 -> Criar cenário')
-		print('2 -> Listar cenários existentes')
-		print('3 -> Opções para cenários existentes')
-		print('4 -> Excluir cenário')
-		print('0 -> Sair')
+		print('1 -> Create scenario')
+		print('2 -> List existing scenarios')
+		print('3 -> Options for scenarios')
+		print('4 -> Exclude scenario')
+		print('0 -> Exit')
 		print('===================================================')
 		option = input(">> ")
 
@@ -43,7 +43,7 @@ class Main_Script():
 			self.close()
 
 	def criar_cenario(self):
-		nome = input('Nome do novo cenário: ')
+		nome = input('Name of the new scenario: ')
 		self.criador.criar_cenario(nome)
 		
 		self.menu()
@@ -51,7 +51,7 @@ class Main_Script():
 	def deleta_cenario(self):
 		os.system('clear')
 		self.gerente.listar_cenarios()
-		nome = input('Nome do cenário que será excluido: ')
+		nome = input('Name of scenario to be removed: ')
 
 		if not self.gerente.cenario_existe(nome):
 			self.criador.deleta_cenario(nome)
@@ -70,18 +70,20 @@ class Main_Script():
 		if not self.gerente.cenario_existe(nome_cenario):
 			while not sair:
 				print('=======================================')
-				print('Opções de Cenários:')
-				print('1 -> Adicionar cliente')
-				print('2 -> Adicionar servidor')
-				print('3 -> Listar containers do cenário')
-				print('4 -> Apagar container')
-				print('5 -> Conectar-se aos dispositivos')
-				print('6 -> Instalar APP')
-				print('8 -> Iniciar cenário')
-				print('9 -> Parar cenário')
-				print('10 -> Reiniciar um container cliente')
-				print('11 -> Criar continer NGINX')
-				print('0 -> Voltar para o menu principal')
+				print('Scenario Options:')
+				print('1 -> Add client')
+				print('2 -> Add server')
+				print('3 -> List containers of the scenario')
+				print('4 -> Delete container')
+				print('5 -> Connect to devices')
+				print('6 -> Install APP')
+				print('7 -> Restart a container')
+				print('8 -> Create Nginx container')
+				print('9 -> Load scenario from JSON')
+				print('10 -> Add real device')
+				print('11 -> Start scenario')
+				print('12 -> Stop scenario')
+				print('0 -> Back to main menu')
 				print('=======================================')
 				option = input('>> ')
 
@@ -131,7 +133,7 @@ class Main_Script():
 					# se False
 						print('Por padrão, não há limite na utilização de CPU.')
 						print('Limitar as CPU onde o container pode executar?')
-						cpus = input("Exemplo: '0-2' ou '1,3': ")
+						cpus = input("Exemplo: '0.7' para 70% , 0.5 para 50% ou vazio para não limitar: ")
 						novo_container = Container(
 							nome_container=nome,
 							nome_cenario=nome_cenario, 
@@ -169,23 +171,15 @@ class Main_Script():
 					apk  = input('Digite o caminho do apk: ')
 					self.gerente.install_app(apk, nome_cenario)
 
-				if option == '8':
-					print('Esta ação pode demorar um pouco ...')
-					self.gerente.iniciar_cenario(nome_cenario)
-
-				if option == '9':
-					print('Esta ação pode demorar um pouco ...')
-					self.gerente.parar_cenario(nome_cenario)
-
-				if option == '10':
+				if option == '7':
 					nome = input('Digite o nome do container: ')
 					if self.gerente.container_existe(nome):
-						self.gerente.restart_container(nome)
+						self.gerente.restart_container(nome, nome_cenario)
 					
 					else:
 						print('Container não existe!')
 
-				if option == '11':
+				if option == '8':
 					nome = input('Digite o nome do container: ')
 					
 					if not self.gerente.container_existe(nome):
@@ -193,6 +187,22 @@ class Main_Script():
 						self.criador.criar_nginx(novo_container)
 					else:
 						print("Nome não permitido ou container já existe!")
+
+				if option == '9':
+					"""Implement the Load from JSON option"""
+					pass
+				
+				if option == '10':
+					name = input("Input the device name shown on ADB: ")
+					self.criador.add_real_device(name, nome_cenario)
+
+				if option == '11':
+					print('Esta ação pode demorar um pouco ...')
+					self.gerente.iniciar_cenario(nome_cenario)
+
+				if option == '12':
+					print('Esta ação pode demorar um pouco ...')
+					self.gerente.parar_cenario(nome_cenario)
 
 				if option == '0':
 					sair = True

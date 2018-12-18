@@ -10,11 +10,9 @@ import subprocess as sp
 
 class Android():
 
-	def __init__(self, nome, console, vnc, rede, time_stamp):
+	def __init__(self, nome, console, time_stamp):
 		self.nome = nome
 		self.console = console
-		self.vnc = vnc
-		self.rede = rede
 		self.time_stamp = time_stamp
 
 	def start_app(self, activity, ip_cloudlet):
@@ -54,7 +52,7 @@ class Android():
 				except:
 					time.sleep(1)
 
-		print("Execucoes do dispositivo %s foram concluidas!" % self.nome)
+		print("Executions for device %s are finished!" % self.nome)
 
 	def get_results(self):
 		os.system(comandos.RESULTS % (self.console, self.time_stamp, self.nome))
@@ -102,10 +100,9 @@ class DeviceManager():
 				8 -> memoria
 				9 -> cpus
 			"""
-			vnc = 'localhost:%s' % str(res[i][2])
 
 			# criação do objeto android
-			android = Android(res[i][1], res[i][3], vnc, res[i][5], self.time_stamp)
+			android = Android(res[i][1], res[i][3], self.time_stamp)
 
 			# lista com os dipositivos
 			devices.append(android)
