@@ -5,6 +5,10 @@ import time
 
 dm = DeviceManager("teste", "172.17.0.5")
 
+# creates clodulet if the servers of the scenraio 
+# are over the threashold
+dm.use_dynamic_cloudlet("nginx_teste", 200)
+
 devices = dm.get_devices()
 
 for android in devices:

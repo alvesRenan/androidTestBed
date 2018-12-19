@@ -2,11 +2,14 @@
 
 import os
 import time
-import random
 import sqlite3
 import Recursos.comandos as comandos
-import threading
+from threading import Thread
 import subprocess as sp
+
+from Componentes.criador import Criador
+from Componentes.gerente import Gerente
+from .class_container import Container
 
 class Android():
 
@@ -59,9 +62,10 @@ class Android():
 		os.system(comandos.ERRORS % (self.console, self.time_stamp, 'errors-' + self.nome))
 
 	def run(self, action, ip_cloudlet, argumentos, repeticoes):
+		# import random
 		# time.sleep(random.randrange(1, 5))
 
-		android_thread = threading.Thread(target=self.exec_run, args=(action, ip_cloudlet, argumentos, repeticoes,))
+		android_thread = Thread(target=self.exec_run, args=(action, ip_cloudlet, argumentos, repeticoes,))
 		android_thread.start()
 
 class DeviceManager():
@@ -69,23 +73,23 @@ class DeviceManager():
 	def __init__(self, nome_cenario, ip_cloudlet):
 		self.nome_cenario = nome_cenario
 		self.ip_cloudlet = ip_cloudlet
-
+		self.conn = sqlite3.connect('DB/mydb.db')
+		self.cur = self.conn.cursor()
+		
 		# cria a pasta para guardar os arquivos de saida
 		self.time_stamp = time.strftime("%d-%m-%Y_%H:%M:%S")
 		os.mkdir(self.time_stamp)
 
 	def get_devices(self):
 		# conexão com a database
-		conn = sqlite3.connect('DB/mydb.db')
-		cur = conn.cursor()
 
 		devices = []
 
 		# seleção dos dispositivos que fazem parte do cenário e estão ativos
-		cur.execute('SELECT * FROM containers WHERE nome_cenario = :nome AND estado_container = :estado AND is_server = 0',
+		self.cur.execute('SELECT * FROM containers WHERE nome_cenario = :nome AND estado_container = :estado AND is_server = 0',
 					{ 'nome': self.nome_cenario, 'estado': 'EXECUTANDO' }
 				)
-		res = cur.fetchall()
+		res = self.cur.fetchall()
 
 		for i in range(len(res)):
 			""" 
@@ -107,9 +111,6 @@ class DeviceManager():
 			# lista com os dipositivos
 			devices.append(android)
 
-		# encerra a conexão
-		conn.close()
-
 		# retorna a lista com objetos
 		return devices
 
@@ -119,3 +120,47 @@ class DeviceManager():
 
 	def exec_activity(self, android, action, argumentos, repeticoes):
 		android.run(action, self.ip_cloudlet, argumentos, repeticoes)
+
+	def start_dynamic_cloudlet(self, threshold, servers_list, nginx_name):
+		manager = Criador()
+		controller = Gerente()
+
+		added_cloudlets = 0
+		while True:
+			overload = 0
+
+			for server_info in servers_list:
+				# get the cpu percentage of the given container
+				cpu, _ = sp.getoutput("docker stats %s --no-stream --format '{{.CPUPerc}}'"% server_info[0]).split("%")
+
+				if float(cpu) > threshold:
+					overload += 1
+
+			# if at least one of the cloudlets is overloaded
+			# we create a new cloudlet
+			if overload > 0:
+				# for now it creates an unlimited clodulet
+				novo_container = Container(
+							nome_container="extra-cloudlet-%s" % added_cloudlets,
+							nome_cenario=self.nome_cenario,
+							cpus=server_info[1])
+				manager.criar_server(novo_container, False)
+
+				controller.iniciar_cenario(self.nome_cenario)
+				controller.configure_nginx(nginx_name, self.nome_cenario)
+
+				print("New clodulet added")
+
+				added_cloudlets += 1
+
+	def use_dynamic_cloudlet(self, nginx_name, threshold):
+		self.cur.execute('SELECT nome_container, cpus FROM containers WHERE nome_cenario = :cenario AND is_server = 1',
+			{'cenario': self.nome_cenario})
+
+		servers = self.cur.fetchall()
+
+		self.cloudlet_thread = Thread(target=self.start_dynamic_cloudlet, args=(float(threshold), servers, nginx_name))
+		# set the thread to finish afeter the main thred dies
+		self.cloudlet_thread.daemon = True
+		
+		self.cloudlet_thread.start()

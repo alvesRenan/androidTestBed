@@ -2,7 +2,6 @@
 
 import os
 import re
-import time
 import docker
 import sqlite3
 import nginx
@@ -309,8 +308,8 @@ class Gerente():
 			nginx.dump(conf, file)
 		
 		sp.call('docker cp Recursos/nginx.conf %s:/etc/nginx/nginx.conf' % nome_container, shell=True)
-		sp.call('docker exec %s bash -c "nginx -s reload"' % nome_container, shell=True)
+		sp.call('docker exec %s bash -c "nginx -s reload"' % nome_container, shell=True, stderr=sp.DEVNULL, stdout=sp.DEVNULL)
 		sp.call('rm Recursos/nginx.conf', shell=True)
 
 	def update_cpus(self, nome_container, qtd_cpus):
-		sp.call("docker update --cpus='%s' %s" % (qtd_cpus, nome_container), shell=True)
+		sp.call("docker update --cpus='%s' %s" % (qtd_cpus, nome_container), shell=True, stderr=sp.DEVNULL, stdout=sp.DEVNULL)
