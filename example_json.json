@@ -1,0 +1,26 @@
+{
+    "mobile-devices": [
+        {
+            "name": "android-json-teste-1",
+            "memory": "512",
+            "network": "full"
+        },
+        {
+            "name": "android-json-teste-2",
+            "memory": "1024",
+            "network": "620.0"
+        }
+    ],
+    "server": [
+        {
+            "name": "server-json-test-1",
+            "cpus": "0.8",
+            "memory": "2048"
+        },
+        {
+            "name": "server-json-test-2",
+            "cpus": "",
+            "memory": "512"
+        }
+    ]
+}

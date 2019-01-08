@@ -3,7 +3,7 @@
 from Recursos.DeviceManagerAPI import DeviceManager
 import time
 
-DM = DeviceManager("cloudlet", "192.168.2.111")
+DM = DeviceManager("t", "172.17.0.2")
 
 devices = DM.get_devices()
 
@@ -11,7 +11,7 @@ for android in devices:
 	DM.start_app(android, "com.example.renan.kotlinmpos/.MainActivity")
 
 print("Connecting to cloudlet...")
-time.sleep(10)
+time.sleep(3)
 
 for android in devices:
-	DM.exec_activity(android, "com.example.renan.kotlinmpos.EXTRAS", "--es 'operation' 'mul' --ei 'size' 800", 2)
+	DM.exec_activity(android, "com.example.renan.kotlinmpos.EXTRAS", "--es 'operation' 'mul' --ei 'size' 200", 2)
