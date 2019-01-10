@@ -16,6 +16,9 @@ Fazendo o download das Imagens:
    docker pull renanalves/server-testbed
 
 ## Utilizando a ferramenta
+
+OBS.: Os vídeos são de uma versão mais antiga da ferramenta mas ainda são válidos poís houveram apenas adições de novas opções e refinamento das antigas.
+
 Um vídeo demonstrando a instalação pode ser encontrado em:
 https://youtu.be/7nu-24ESTl0
 
