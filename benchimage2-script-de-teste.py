@@ -3,11 +3,11 @@
 from Recursos.DeviceManagerAPI import DeviceManager
 import time
 
-dm = DeviceManager("w", "172.17.0.5")
+dm = DeviceManager("t", "54.166.148.83")
 
 # creates clodulet if the servers of the scenraio 
 # are over the threashold
-dm.use_dynamic_cloudlet("nifty_booth", 200)
+# dm.use_dynamic_cloudlet("nginx_ts", 30)
 
 devices = dm.get_devices()
 

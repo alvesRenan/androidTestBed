@@ -24,6 +24,12 @@ class Criador:
         # tantativa de criacao da tabela containers e cenarios
         with self.conn:
             self.cur.execute(
+                # OBS.: 'is_server' indicates a lot of things:
+                # if 0 -> android container
+                # if 1 -> server container
+                # if 2 -> nginx container
+                # if 3 -> real device
+
                 """CREATE TABLE IF NOT EXISTS  containers (
                         nome_cenario text,
                         nome_container text,
@@ -48,22 +54,23 @@ class Criador:
         # procurar as maiores portas em uso e definindo o valor das portas para novos containers
         self.cur.execute('SELECT MAX(porta_6080) FROM containers')
         resposta = self.cur.fetchone()
-        if resposta[0] == None:
+        if resposta[0] is None:
             self.porta_6080 = 6080
         else:
             self.porta_6080 = resposta[0] + 1
 
         self.cur.execute('SELECT MAX(porta_5554) FROM containers')
         resposta = self.cur.fetchone()
-        if resposta[0] == None:
+        if resposta[0] is None:
             self.porta_5554 = 5554
         else:
+            print(resposta)
             _, port_5554 = resposta[0].split('-')
             self.porta_5554 = int(port_5554) + 2
 
         self.cur.execute('SELECT MAX(porta_5555) FROM containers')
         resposta = self.cur.fetchone()
-        if resposta[0] == None:
+        if resposta[0] is None:
             self.porta_5555 = 5555
         else:
             self.porta_5555 = resposta[0] + 2
@@ -90,7 +97,8 @@ class Criador:
             return False
 
     def deleta_cenario(self, nome_cenario):
-        self.cur.execute('SELECT nome_container FROM containers WHERE nome_cenario = :nome', {'nome': nome_cenario})
+        self.cur.execute('SELECT nome_container, is_server FROM containers WHERE nome_cenario = :nome',
+                         {'nome': nome_cenario})
         res = self.cur.fetchall()
 
         for i in range(len(res)):
@@ -103,6 +111,16 @@ class Criador:
                 self.cur.execute('DELETE FROM cenarios WHERE nome_cenario = :nome', {'nome': nome_cenario})
             except Exception as e:
                 raise e
+
+    def delete_real_devices(self, nome_cenario):
+        self.cur.execute('SELECT nome_container, is_server FROM containers WHERE nome_cenario = :nome',
+                         {'nome': nome_cenario})
+        res = self.cur.fetchall()
+
+        for i in res:
+            if i[1] is 3:
+                with self.conn:
+                    self.cur.execute('DELETE FROM containers WHERE nome_container = :nome', {'nome': i[0]})
 
     def criar_cliente(self, novo_container, rede):
         with self.conn:
@@ -217,8 +235,8 @@ class Criador:
     def add_real_device(self, device_name, cenario):
         with self.conn:
             self.cur.execute(
-                "INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory, cpus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (cenario, device_name, None, device_name, None, None, None, None)
+                "INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory, cpus, estado_container, is_server) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (cenario, device_name, None, device_name, None, None, None, None, "EXECUTANDO", 3)
             )
 
     def create_from_json(self, json_file, cenario):

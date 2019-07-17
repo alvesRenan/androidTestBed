@@ -56,6 +56,7 @@ class MainScript:
 
         if not self.gerente.cenario_existe(nome):
             self.criador.deleta_cenario(nome)
+            self.criador.delete_real_devices(nome)
 
         self.menu()
 
@@ -221,6 +222,7 @@ class MainScript:
                 if option == '12':
                     print('Esta ação pode demorar um pouco ...')
                     self.gerente.parar_cenario(nome_cenario)
+                    self.criador.delete_real_devices(nome_cenario)
 
                 if option == '0':
                     sair = True
