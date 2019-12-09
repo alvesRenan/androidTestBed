@@ -64,7 +64,7 @@ class MainScript:
         sair = False
         os.system('clear')
         self.gerente.listar_cenarios()
-        nome_cenario = input('Digite o nome do cenário que será configurado: ')
+        nome_cenario = input('Enter the name of the scenario to be configured: ')
 
         os.system('clear')
 
@@ -91,28 +91,28 @@ class MainScript:
 
                 # carcterísticas do container cliente que será criado
                 if option == '1':
-                    nome = input('Digite o nome do container: ')
+                    nome = input('Enter the container name: ')
 
                     # checagem se o nome já existe
                     if not self.gerente.container_existe(nome):
                         # se False
 
-                        print('Configurações de rede disponíveis: umts, lte, full')
-                        rede = input('Digite o nome da rede a ser usada ou defina o valor em kbps (Ex: 620.0): ')
+                        print('Available network configurations: umts, lte, full')
+                        rede = input('Entre the name of the network or define the value to be used in kbps (Ex: 620.0): ')
                         regex = re.match('lte|umts|full|[0-9]', rede)
 
                         if regex is None:
-                            print('Rede não compatível! Utilizando rede padrão \'full\'')
+                            print('Network not supported! Using default network \'full\'')
                             rede = 'full'
 
-                        print('Configuração de memória RAM (em MB) do dispositivo (valor padrão 512 MB)')
-                        memory = input('Digite a quantidade de memória do dispositivo: ')
+                        print('Memory value (in MB) of the device (defalt value 512 MB)')
+                        memory = input('Input the amount of memmory the device will have: ')
 
                         try:
                             if int(memory) < 512:
                                 memory = '512'
                         except:
-                            print("Valor inválido, utilizando valor padrão.")
+                            print("Invalid value, using default value.")
                             memory = '512'
 
                         # criação do objeto Container
@@ -125,16 +125,16 @@ class MainScript:
 
                     # se True
                     else:
-                        print('Nome não permitido ou container já existe!')
+                        print('Name not allowed or already in use!')
 
                 if option == '2':
-                    nome = input('Digite o nome do container: ')
+                    nome = input('Enter the container name: ')
 
                     # checagem se o nome já existe
                     if not self.gerente.container_existe(nome):
                         # se False
-                        print('Defina a quantidade de memória do servidor ou deixe em vazio para não limitar.')
-                        memory = input('Quantidade de memória do servidor em megabytes: ')
+                        print('Define the amount of memory the server or leave it empty to not limit.')
+                        memory = input('Amount of memory of the server in megabytes: ')
 
                         try:
                             if int(memory):
@@ -143,12 +143,12 @@ class MainScript:
                                 # so, for example, 512m or 1024m
                                 memory = memory + 'm'
                         except:
-                            print("Valor inválido, criando servidor sem limite de memória.")
+                            print("Invalid value, creating server with no memory limit.")
                             memory = ''
 
-                        print('Por padrão, não há limite na utilização de CPU.')
-                        print('Limitar as CPU onde o container pode executar?')
-                        cpus = input("Exemplo: '0.7' para 70% , 0.5 para 50% ou vazio para não limitar: ")
+                        print('By default, there is no memory CPU utilization lmit.')
+                        print('Limit the CPUs where the container can execute?')
+                        cpus = input("Example: '0.7' for 70% , 0.5 for 50% or empty to not limit: ")
 
                         novo_container = Container(
                             nome_container=nome,
@@ -157,11 +157,11 @@ class MainScript:
                             cpus=cpus)
 
                         bind_ports = input(
-                            "Fazer o bind das portas? (S)im/(N)ão (Fazer o bind das portas impede que mais de um container servidor seja criado): ")
+                            "Bind ports? (Y)es/(N)o (Making the port bind prevents more than one server container to be created): ")
 
                         if bind_ports.lower() == 'n':
                             self.criador.criar_server(novo_container, False)
-                            print("Após criar todos os servidores não esqueça de criar um container NGINX!")
+                            print("After creating all the servers don't forget to create a Nginx container!")
                         else:
                             self.criador.criar_server(novo_container)
 
@@ -174,7 +174,7 @@ class MainScript:
                     self.gerente.listar_containers(nome_cenario)
 
                 if option == '4':
-                    nome = input('Digite o nome do container: ')
+                    nome = input('Enter the container name: ')
 
                     if self.gerente.container_existe(nome):
                         self.criador.deleta_container(nome)
@@ -190,7 +190,7 @@ class MainScript:
                     self.gerente.install_app(apk, nome_cenario)
 
                 if option == '7':
-                    nome = input('Digite o nome do container: ')
+                    nome = input('Enter the container name: ')
                     if self.gerente.container_existe(nome):
                         self.gerente.restart_container(nome, nome_cenario)
 
@@ -198,16 +198,16 @@ class MainScript:
                         print('Container não existe!')
 
                 if option == '8':
-                    nome = input('Digite o nome do container: ')
+                    nome = input('Enter the container name: ')
 
                     if not self.gerente.container_existe(nome):
                         novo_container = Container(nome, nome_cenario)
                         self.criador.criar_nginx(novo_container)
                     else:
-                        print("Nome não permitido ou container já existe!")
+                        print("Name not allowed or already in use!")
 
                 if option == '9':
-                    file_path = input("Caminho para o arquivo JSON: ")
+                    file_path = input("Path to JSON file: ")
 
                     self.criador.create_from_json(file_path, nome_cenario)
 
@@ -216,11 +216,11 @@ class MainScript:
                     self.criador.add_real_device(name, nome_cenario)
 
                 if option == '11':
-                    print('Esta ação pode demorar um pouco ...')
+                    print('This may take a while ...')
                     self.gerente.iniciar_cenario(nome_cenario)
 
                 if option == '12':
-                    print('Esta ação pode demorar um pouco ...')
+                    print('This may take a while ...')
                     self.gerente.parar_cenario(nome_cenario)
                     self.criador.delete_real_devices(nome_cenario)
 
@@ -230,7 +230,7 @@ class MainScript:
             self.menu()
 
         else:
-            print('Cenário não existente. Use a opção \'Criar cenário\' ou a opção \'Listar cenários existentes\'')
+            print("Scenario not existent. Use the 'Create scenario' option or 'List existing scenarios'")
             self.menu()
 
     def close(self):

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import os
 import json
+import os
 import re
-
-import docker
 import sqlite3
 
+import docker
+
 from Recursos.class_container import Container
+
 from .gerente import Gerente
 
 
@@ -37,7 +38,7 @@ class Criador:
                         porta_5554 text,
                         porta_5555 integer,
                         rede text,
-                        estado_container text default 'CRIADO',
+                        estado_container text default 'CREATED',
                         is_server integer default 0,
                         memory text,
                         cpus text
@@ -47,7 +48,7 @@ class Criador:
             self.cur.execute(
                 """CREATE TABLE IF NOT EXISTS cenarios(
                         nome_cenario text,
-                        estado_cenario text default 'PARADO'
+                        estado_cenario text default 'STOPPED'
                     )"""
             )
 
@@ -64,9 +65,11 @@ class Criador:
         if resposta[0] is None:
             self.porta_5554 = 5554
         else:
-            print(resposta)
-            _, port_5554 = resposta[0].split('-')
-            self.porta_5554 = int(port_5554) + 2
+            try:
+                _, port_5554 = resposta[0].split('-')
+                self.porta_5554 = int(port_5554) + 2
+            except ValueError:
+                pass
 
         self.cur.execute('SELECT MAX(porta_5555) FROM containers')
         resposta = self.cur.fetchone()
@@ -85,7 +88,7 @@ class Criador:
                         {'nome': nome_cenario}
                     )
 
-                    print('Cenario criado')
+                    print('Scenario created')
 
                     return True
 
@@ -93,7 +96,7 @@ class Criador:
                     print(e)
                     return False
         else:
-            print('O nome ja existe!')
+            print('The name is already in use!')
             return False
 
     def deleta_cenario(self, nome_cenario):
@@ -152,7 +155,7 @@ class Criador:
                 self.porta_5555 += 2
 
             except:
-                print("Erro ao criar container")
+                print("Error while trying to connect to container")
                 return 1
 
     def criar_server(self, novo_container, bind_ports=True):
@@ -226,7 +229,7 @@ class Criador:
     def deleta_container(self, nome_container):
         for container in self.client.containers.list(all=True):
             if container.name == nome_container:
-                print('Deletando o container %s' % container.name)
+                print('Deleating container %s' % container.name)
                 container.remove(force=True)
 
                 with self.conn:
@@ -236,7 +239,7 @@ class Criador:
         with self.conn:
             self.cur.execute(
                 "INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory, cpus, estado_container, is_server) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (cenario, device_name, None, device_name, None, None, None, None, "EXECUTANDO", 3)
+                (cenario, device_name, None, device_name, device_name, None, None, None, "EXECUTING", 3)
             )
 
     def create_from_json(self, json_file, cenario):
@@ -251,11 +254,11 @@ class Criador:
                 regex = re.match('lte|umts|full|[0-9]', device.get('network'))
 
                 if regex is None:
-                    print('Configuração de rede do dispositivo %s não é suportada!' % device.get('name'))
+                    print('Network configuration for device %s is not supported!' % device.get('name'))
                     continue
 
                 if int(device.get('memory')) < 512:
-                    print("Valor de memória inferior ao mínimo para o dispositivo %s." % device.get('name'))
+                    print("Memory value too low for device %s." % device.get('name'))
                     continue
 
                 new_container = Container(
@@ -264,10 +267,11 @@ class Criador:
                     nome_cenario=cenario
                 )
 
+                print("Creating container: %s" % device.get('name'))
                 self.criar_cliente(new_container, device.get('network'))
 
             else:
-                print("O nome %s já está em uso!" % device.get('name'))
+                print("The name %s is already in use!" % device.get('name'))
 
         for server in config_data.get('server'):
             if not self.gerente.container_existe(server.get('name')):
@@ -288,11 +292,13 @@ class Criador:
                     memory=mem_limit,
                     nome_cenario=cenario
                 )
-
+                
+                print("Creating container: %s" % server.get('name'))
                 self.criar_server(new_container, False)
 
         """Creates the Nginx container in order to access the previous created servers. The name is random"""
+        print("Creating Nginx container")
         self.criar_nginx(Container('', cenario))
 
-        print("Iniciando containers....")
+        print("Starting containers....")
         self.gerente.iniciar_cenario(cenario)

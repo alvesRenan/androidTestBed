@@ -2,12 +2,14 @@
 
 import os
 import re
-import docker
 import sqlite3
-import nginx
-import Recursos.comandos as comandos
 import subprocess as sp
+
+import docker
+import nginx
 from texttable import Texttable
+
+import Recursos.comandos as comandos
 
 
 class Gerente:
@@ -25,7 +27,7 @@ class Gerente:
         res = self.cur.fetchall()
 
         table = Texttable()
-        table.add_row(['Nome do Cenário', 'Estado do Ceńário'])
+        table.add_row(['Scenario Name', 'Scenario State'])
 
         for i in range(len(res)):
             # posição 0 contém o nome e posição 1 o estado
@@ -39,7 +41,7 @@ class Gerente:
         res = self.cur.fetchall()
 
         table = Texttable(max_width=0)
-        table.header(['Nome Container', 'VNC', 'Emulador', 'IP', 'Rede/Speed', 'Memória', 'CPUS', 'Estado'])
+        table.header(['Container Name', 'VNC', 'Emulador', 'IP', 'Network/Speed', 'Memory', 'CPUS', 'State'])
 
         for i in range(len(res)):
             """ 
@@ -55,19 +57,21 @@ class Gerente:
                 9 -> cpus
             """
 
+            cpus = '---'
+            vnc = '---'
+            console_adb = '---'
+            ip = sp.getoutput(comandos.GET_IP % res[i][1])
+
             if res[i][7] == 0:
                 # criando o edereço para o noVNC
                 vnc = 'localhost:%s' % str(res[i][2])
-                # memory = res[i][8]
                 console_adb = '%s' % str(res[i][3])
-                cpus = '---'
-            else:
-                vnc = '---'
-                # memory = '---'
-                console_adb = '---'
-                cpus = res[i][9]
 
-            ip = sp.getoutput(comandos.GET_IP % res[i][1])
+            if res[i][7] == 3:
+                console_adb = '%s' % str(res[i][3])
+                ip = '---'
+            else:
+                cpus = res[i][9]
 
             # configurações de formatação da tabela
             table.set_cols_align(['l', 'c', 'c', 'c', 'c', 'c', 'c', 'c'])
@@ -77,8 +81,8 @@ class Gerente:
         print(table.draw())
 
     def listar_console_dispositivos(self, nome_cenario):
-        self.cur.execute('SELECT porta_5554 FROM containers WHERE nome_cenario = :nome AND is_server = :var',
-                         {'nome': nome_cenario, 'var': 0})
+        self.cur.execute('SELECT porta_5554 FROM containers WHERE nome_cenario = :nome AND is_server = 0 OR is_server = 3',
+                         {'nome': nome_cenario})
         consoles = []
 
         for i in self.cur.fetchall():
@@ -150,10 +154,10 @@ class Gerente:
                         self.configure_nginx(i[0], nome_cenario)
 
     def iniciar_cenario(self, nome_cenario):
-        # retorna o nome e o tipo de rede de containers em estado PARADO ou CRIADO do cenário
+        # retorna o nome e o tipo de rede de containers em estado STOPPED ou CREATED do cenário
         self.cur.execute(
             'SELECT nome_container, rede, is_server, memory FROM containers WHERE nome_cenario = ? AND (estado_container = ? OR estado_container = ?)',
-            (nome_cenario, 'CRIADO', 'PARADO')
+            (nome_cenario, 'CREATED', 'STOPPED')
         )
         resultado = self.cur.fetchall()
 
@@ -166,28 +170,28 @@ class Gerente:
                     # inicia o container
                     container.restart()
 
-                    # atualiza o estado do container no banco para EXECUTANDO
+                    # atualiza o estado do container no banco para EXECUTING
                     with self.conn:
                         try:
                             self.cur.execute("UPDATE containers SET estado_container = ? WHERE nome_container = ?",
-                                             ('EXECUTANDO', i[0]))
+                                             ('EXECUTING', i[0]))
                         except Exception as e:
                             raise e
 
         self.iniciar_servicos(resultado, nome_cenario)
 
-        # atualiza o estado cenario no banco para ATIVO
+        # atualiza o estado cenario no banco para ACTIVE
         with self.conn:
             try:
                 self.cur.execute("UPDATE cenarios SET estado_cenario = :novo_estado WHERE nome_cenario = :nome",
-                                 {'novo_estado': 'ATIVO', 'nome': nome_cenario})
+                                 {'novo_estado': 'ACTIVE', 'nome': nome_cenario})
             except Exception as e:
                 raise e
 
     def parar_cenario(self, nome_cenario):
         self.cur.execute(
             'SELECT nome_container, is_server FROM containers WHERE nome_cenario = ? AND (estado_container = ? OR estado_container = ?)',
-            (nome_cenario, 'CRIADO', 'EXECUTANDO')
+            (nome_cenario, 'CREATED', 'EXECUTING')
         )
 
         resultado = self.cur.fetchall()
@@ -208,19 +212,21 @@ class Gerente:
                     # para o cintainer
                     container.stop()
 
-                    # atualiza o estado do container no banco para PARADO
+                    # atualiza o estado do container no banco para STOPPED
                     with self.conn:
                         try:
                             self.cur.execute("UPDATE containers SET estado_container = ? WHERE nome_container = ?",
-                                             ('PARADO', i[0]))
+                                             ('STOPPED', i[0]))
+                            # Removes real device entries from the database
+                            self.cur.execute("DELETE FROM containers WHERE is_server = :is_server", {'is_server': 3})
                         except Exception as e:
                             raise e
 
-        # atualiza o estado cenario no banco para ATIVO
+        # atualiza o estado cenario no banco para ACTIVE
         with self.conn:
             try:
                 self.cur.execute("UPDATE cenarios SET estado_cenario = :novo_estado WHERE nome_cenario = :nome",
-                                 {'novo_estado': 'PARADO', 'nome': nome_cenario})
+                                 {'novo_estado': 'STOPPED', 'nome': nome_cenario})
             except Exception as e:
                 raise e  # Latest commit a9494d7  4 days ago
 
@@ -234,8 +240,9 @@ class Gerente:
     # instalar app
     def install_app(self, apk, nome_cenario):
         consoles = self.listar_console_dispositivos(nome_cenario)
-
+        #print("DEBUGGING: ", consoles)
         for i in consoles:
+            #print("DEBUGGING: ", comandos.INSTALL_APP % (i, apk))
             saida = os.system(comandos.INSTALL_APP % (i, apk))
             print(saida)
 
@@ -245,7 +252,7 @@ class Gerente:
                 with self.conn:
                     self.cur.execute(
                         'SELECT nome_container, rede, is_server, memory FROM containers WHERE nome_container = ? AND estado_container = ?',
-                        (nome_container, 'EXECUTANDO'))
+                        (nome_container, 'EXECUTING'))
 
                     resultado = self.cur.fetchall()
 
@@ -271,7 +278,8 @@ class Gerente:
             'DiscoveryServiceTcpServer': '30015',
             'DiscoveryMulticastService': '31000',
             'RpcTcpServer_matrixOperations': '36415',
-            'RpcTcpServer_kotlin_matrixOperations': '36241'
+            'RpcTcpServer_kotlin_matrixOperations': '36241',
+            'RpcTcpServer_sourceafis': '36619'
         }
 
         conf = nginx.Conf()

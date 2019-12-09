@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os
-import time
 import sqlite3
-import Recursos.comandos as comandos
-from threading import Thread
 import subprocess as sp
+import time
+from threading import Thread
 
+import Recursos.comandos as comandos
 from Componentes.criador import Criador
 from Componentes.gerente import Gerente
+
 from .class_container import Container
 
 
@@ -33,7 +34,7 @@ class Android:
 
         # ciclo de repeticoes da activity
         while num_interacoes <= repeticoes:
-            print("Interacao numero %i do dispositivo %s" % (num_interacoes, self.nome))
+            print("Interaction number %i for device %s" % (num_interacoes, self.nome))
 
             # chamada da activity
             os.system(comandos.EXEC % (self.console, action, argumentos))
@@ -72,14 +73,24 @@ class Android:
 
 class DeviceManager:
 
-    def __init__(self, nome_cenario, ip_cloudlet):
+    def __init__(self, nome_cenario, ip_cloudlet, diretorio_saida=False):
         self.nome_cenario = nome_cenario
         self.ip_cloudlet = ip_cloudlet
         self.conn = sqlite3.connect('DB/mydb.db')
         self.cur = self.conn.cursor()
 
         # cria a pasta para guardar os arquivos de saida
-        self.time_stamp = time.strftime("%d-%m-%Y_%H:%M:%S")
+
+        # Nova feature para adicionar depois
+        # passar o nome da pasta de saida
+        # como parametro na hora de criar o objeto
+        # da class DeviceManager
+        # por agora vai na gambiarra
+        if diretorio_saida:
+            self.time_stamp = diretorio_saida
+        else:
+            self.time_stamp = time.strftime("%d-%m-%Y_%H:%M:%S")
+            
         os.mkdir(self.time_stamp)
 
     def get_devices(self):
@@ -89,8 +100,8 @@ class DeviceManager:
 
         # seleção dos dispositivos que fazem parte do cenário e estão ativos
         self.cur.execute(
-            'SELECT * FROM containers WHERE nome_cenario = :nome AND estado_container = :estado AND is_server = 0',
-            {'nome': self.nome_cenario, 'estado': 'EXECUTANDO'}
+            'SELECT * FROM containers WHERE nome_cenario = :nome AND estado_container = :estado AND is_server = 0 OR is_server = 3',
+            {'nome': self.nome_cenario, 'estado': 'EXECUTING'}
             )
         res = self.cur.fetchall()
 

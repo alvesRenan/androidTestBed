@@ -1,21 +1,18 @@
 #!/usr/bin/python3
 
-from Recursos.DeviceManagerAPI import DeviceManager
 import time
 
-dm = DeviceManager("t", "54.166.148.83")
+from Recursos.DeviceManagerAPI import DeviceManager
 
-# creates clodulet if the servers of the scenraio 
-# are over the threashold
-# dm.use_dynamic_cloudlet("nginx_ts", 30)
+dm = DeviceManager( "Test", "172.17.0.4" )
 
 devices = dm.get_devices()
 
 for android in devices:
-	dm.start_app(android, "br.ufc.mdcc.benchimage2/.MainActivity")
+	dm.start_app( android, "br.ufc.mdcc.benchimage2/.MainActivity" )
 
 print("Connecting....")
 time.sleep(5)
 
 for android in devices:
-	dm.exec_activity(android, "benchimage2.EXTRAS", "--ei size 4 --ei filter 2 --ei local 1", 4)
+	dm.exec_activity( android, "benchimage2.EXTRAS", "--ei size 4 --ei filter 2 --ei local 1", 3 )

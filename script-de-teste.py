@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
+import time
+
 # importa a API
 from Recursos.DeviceManagerAPI import DeviceManager
-import time
 
 # instancia a classe da API passando o nome do cenario e o ip da cloudlet
 DM = DeviceManager("teste", "192.168.1.10")
