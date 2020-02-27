@@ -29,14 +29,15 @@ EXEC = "adb -s %s shell am broadcast -a %s %s > /dev/null"
 
 # Coleta os dados de execucao do logcat e salva em um arquivo com o mesmo nome do container
 # Exemplo: adb -s emulator-5070 shell logcat -t | grep DebugRpc > diretorio/file.txt
-RESULTS = "adb -s %s shell logcat -d | grep DebugRpc > %s/%s"
+# RESULTS = "adb -s %s shell logcat -d | grep DebugRpc > %s/%s"
+RESULTS = "adb -s %s shell logcat -d -s 'br.ufc.mdcc.mpos.offload.ProxyHandler' > %s/%s"
 
 # Coleda os logs de erro do app MAtrixOperationsKoltlin
 ERRORS = "adb -s %s shell logcat -d | grep 'An Error Occurred!' > %s/%s"
 
 # Limpa o logcat do dispositivo
 # Exemplo: adb -s emulator-5070 shell logcat -c
-CLEAR_LOG = "adb -s %s shell logcat -c"
+CLEAR_LOG = "adb -s %s shell logcat -b all -c"
 
 ###################################
 
