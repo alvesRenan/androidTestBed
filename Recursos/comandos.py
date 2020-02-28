@@ -28,9 +28,8 @@ SET_CLOUDLET = "adb -s %s shell am start -n %s --es 'cloudlet' '%s' > /dev/null"
 EXEC = "adb -s %s shell am broadcast -a %s %s > /dev/null"
 
 # Coleta os dados de execucao do logcat e salva em um arquivo com o mesmo nome do container
-# Exemplo: adb -s emulator-5070 shell logcat -t | grep DebugRpc > diretorio/file.txt
-# RESULTS = "adb -s %s shell logcat -d | grep DebugRpc > %s/%s"
-RESULTS = "adb -s %s shell logcat -d -s 'br.ufc.mdcc.mpos.offload.ProxyHandler' > %s/%s"
+# Exemplo: adb -s emulator-5554 shell logcat -d | grep DebugRpc | tail -n 1 >> diretorio/file.txt
+RESULTS = "adb -s %s shell logcat -d | grep DebugRpc | tail -n 1 >> %s/%s"
 
 # Coleda os logs de erro do app MAtrixOperationsKoltlin
 ERRORS = "adb -s %s shell logcat -d | grep 'An Error Occurred!' > %s/%s"
