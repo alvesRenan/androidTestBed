@@ -31,6 +31,7 @@ class Android:
         os.system(comandos.CLEAR_LOG % self.console)
 
         num_interacoes = 1
+        os.system( comandos.CREATE_OUT_FILE % (self.time_stamp, self.nome) )
 
         # ciclo de repeticoes da activity
         while num_interacoes <= repeticoes:
@@ -60,8 +61,17 @@ class Android:
         print("Executions for device %s are finished!" % self.nome)
 
     def get_results(self):
-        os.system(comandos.RESULTS % (self.console, self.time_stamp, self.nome))
-        os.system(comandos.ERRORS % (self.console, self.time_stamp, 'errors-' + self.nome))
+        # os.system(comandos.RESULTS % (self.console, self.time_stamp, self.nome))
+        # os.system(comandos.ERRORS % (self.console, self.time_stamp, 'errors-' + self.nome))
+
+        file_last_line = sp.getoutput( comandos.LAST_LINE % (self.time_stamp, self.nome) )
+        log_last_line = sp.getoutput( comandos.RESULTS % self.console )
+
+        if str(log_last_line) != str(file_last_line) and str(log_last_line) != '':
+          os.system( comandos.WRITE_RESULTS % (log_last_line, self.time_stamp, self.nome) )
+        
+        os.system( comandos.ERRORS % (self.console, self.time_stamp, 'errors-' + self.nome) )
+
 
     def run(self, action, ip_cloudlet, argumentos, repeticoes):
         # import random
@@ -91,7 +101,7 @@ class DeviceManager:
         else:
             self.time_stamp = time.strftime("%d-%m-%Y_%H:%M:%S")
             
-        os.mkdir(self.time_stamp)
+        os.makedirs(self.time_stamp)
 
     def get_devices(self):
         # conexão com a database

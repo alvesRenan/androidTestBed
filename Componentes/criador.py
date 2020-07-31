@@ -161,7 +161,8 @@ class Criador:
     def criar_server(self, novo_container, bind_ports=True):
         if bind_ports:
             self.client.containers.run(
-                'renanalves/server-testbed',
+                # 'renanalves/server-testbed',
+                'renanalves/server-testbed-source-afis:latest',
                 detach=True,
                 tty=True,
                 stdin_open=True,
