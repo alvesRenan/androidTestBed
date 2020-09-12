@@ -232,10 +232,9 @@ class Gerente:
 
     # conexão com os emuladores pelo adb
     def conectar_dispositivos(self, nome_cenario):
-        os.system(comandos.ADB_KILL)
-        output = sp.getoutput(comandos.ADB_START)
-
-        print(output)
+        for device in self.listar_console_dispositivos(nome_cenario):
+          output = sp.getoutput( comandos.ADB_CONNECT % device )
+          print(output)
 
     # instalar app
     def install_app(self, apk, nome_cenario):

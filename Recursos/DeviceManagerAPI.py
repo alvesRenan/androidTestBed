@@ -61,16 +61,13 @@ class Android:
         print("Executions for device %s are finished!" % self.nome)
 
     def get_results(self):
-        # os.system(comandos.RESULTS % (self.console, self.time_stamp, self.nome))
-        # os.system(comandos.ERRORS % (self.console, self.time_stamp, 'errors-' + self.nome))
+      file_last_line = sp.getoutput( comandos.LAST_LINE % (self.time_stamp, self.nome) )
+      log_last_line = sp.getoutput( comandos.RESULTS % self.console )
 
-        file_last_line = sp.getoutput( comandos.LAST_LINE % (self.time_stamp, self.nome) )
-        log_last_line = sp.getoutput( comandos.RESULTS % self.console )
-
-        if str(log_last_line) != str(file_last_line) and str(log_last_line) != '':
-          os.system( comandos.WRITE_RESULTS % (log_last_line, self.time_stamp, self.nome) )
-        
-        os.system( comandos.ERRORS % (self.console, self.time_stamp, 'errors-' + self.nome) )
+      if str(log_last_line) != str(file_last_line) and str(log_last_line) != '':
+        os.system( comandos.WRITE_RESULTS % (log_last_line, self.time_stamp, self.nome) )
+      
+      os.system( comandos.ERRORS % (self.console, self.time_stamp, 'errors-' + self.nome) )
 
 
     def run(self, action, ip_cloudlet, argumentos, repeticoes):

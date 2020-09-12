@@ -10,10 +10,10 @@ Se você não estiver utilizando a versão 1.26, é necessário modificar os arq
 
 Fazendo o download das Imagens:
 - Download da imagem do cliente:
-   docker pull renanalves/android-testbed
+   docker pull renanalves/android-22:v2
 
-- Download da imagem do servidor (nova versão disponível):
-   docker pull renanalves/server-testbed
+- Download da imagem do servidor:
+   docker pull renanalves/server-testbed:configured
 
 ## Utilizando a ferramenta
 

@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sqlite3
+from time import sleep
 
 import docker
 
@@ -129,24 +130,29 @@ class Criador:
         with self.conn:
             try:
                 self.client.containers.run(
-                    'renanalves/android-testbed',
+                    'renanalves/android-22:v2',
                     cap_add=['NET_ADMIN'],
+                    tty=True,
                     detach=True,
                     privileged=True,
-                    publish_all_ports=True,
                     name=novo_container.nome,
-                    ports={
-                        '6080/tcp': self.porta_6080,
-                        '5554/tcp': self.porta_5554,
-                        '5555/tcp': self.porta_5555
-                    }
+                    command='/root/port_forward.sh'
                 )
+
+                while True:
+                  container = self.client.containers.get(novo_container.nome)
+
+                  if container.status == 'running':
+                    ip = container.attrs.get('NetworkSettings').get('IPAddress')
+                    break
+                  
+                  sleep(1)
 
                 self.cur.execute(
                     "INSERT INTO containers (nome_cenario, nome_container, porta_6080, porta_5554, porta_5555, rede, memory, cpus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         novo_container.cenario, novo_container.nome, self.porta_6080,
-                        "emulator-{}".format(self.porta_5554),
+                        "{}:{}".format( ip, '5555' ),
                         self.porta_5555, rede, novo_container.memory, novo_container.cpus)
                 )
 
@@ -161,8 +167,8 @@ class Criador:
     def criar_server(self, novo_container, bind_ports=True):
         if bind_ports:
             self.client.containers.run(
-                # 'renanalves/server-testbed',
-                'renanalves/server-testbed-source-afis:latest',
+                'renanalves/server-testbed:configured',
+                # 'renanalves/server-testbed-source-afis:latest',
                 detach=True,
                 tty=True,
                 stdin_open=True,
@@ -184,20 +190,22 @@ class Criador:
                     '36619/tcp': 36619
                 },
                 publish_all_ports=True,
-                cap_add=['NET_ADMIN'],
+                # cap_add=['NET_ADMIN'],
                 name=novo_container.nome,
-                mem_limit=novo_container.memory
+                mem_limit=novo_container.memory,
+                network='testbed'
             )
         else:
             self.client.containers.run(
-                'renanalves/server-testbed',
+                'renanalves/server-testbed:configured',
                 detach=True,
                 tty=True,
                 stdin_open=True,
                 privileged=True,
                 cap_add=['NET_ADMIN'],
                 name=novo_container.nome,
-                mem_limit=novo_container.memory
+                mem_limit=novo_container.memory,
+                network='testbed'
             )
 
         if not novo_container.cpus == "":
@@ -293,7 +301,7 @@ class Criador:
                     memory=mem_limit,
                     nome_cenario=cenario
                 )
-                
+
                 print("Creating container: %s" % server.get('name'))
                 self.criar_server(new_container, False)
 
