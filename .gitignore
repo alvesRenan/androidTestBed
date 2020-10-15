@@ -3,5 +3,6 @@ __pycache__
 .idea
 Apps/source-afis.apk
 source-afis.py
+source-afis-script-test.py
 caos-matrixoperations.py
 teste
