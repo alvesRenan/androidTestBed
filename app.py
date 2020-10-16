@@ -51,7 +51,7 @@ class App:
     scenario = input( 'Name of the scenario to be configured: ' )
 
     if db_mgr.scenario_exists( scenario ):
-      "Wokaround to finish the class execution and go back to this menu"
+      "Workaround to finish the class execution and go back to this menu"
       try:
         ConfigMenu( scenario, self.mgr, self.ctrl )
       except FinishedExecution:
