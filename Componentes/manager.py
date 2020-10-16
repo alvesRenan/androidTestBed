@@ -3,6 +3,7 @@
 """
 
 from Componentes.db_manager import db_mgr
+from Componentes.docker_manager import docker_mgr
 
 
 class Manager:
@@ -44,3 +45,12 @@ class Manager:
       return
   
     print( 'Scenario not found.' )
+  
+  def add_client(self,  container_name, scenario_name, memory, network ):
+    ip_ctnr = docker_mgr.create_client_container( container_name )
+
+    if ip_ctnr is None:
+      print( 'Something went wrong.' )
+    
+    "The adb connection is the container ip and the default port 5555"
+    db_mgr.insert_container( container_name, ip_ctnr+'5555', scenario_name, memory, network)

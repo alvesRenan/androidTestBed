@@ -44,6 +44,24 @@ class DBManager:
     """Deletes a scenario and the containers associated with it"""
     with self.conn:
       self.cur.execute( DELETE_SCENARIO, {'name': scenario_name} )
+  
+  def container_exists(self, container_name):
+    """Checks if a container with a given name already exists
 
+      Args:
+        container_name (str): Name of the container
+
+      Returns:
+        list if container exists or None if dosn't exists
+    """
+    self.cur.execute( CONTAINER_EXISTS, {'name': container_name} )
+
+    return self.cur.fetchone()
+
+  def insert_container(self, container_name, adb_connection, scenario_name, memory, network):
+    with self.conn:
+      self.cur.execute( INSET_CONTAINER, (
+        container_name, adb_connection, scenario_name, memory, network) )
+    
 
 db_mgr = DBManager()
