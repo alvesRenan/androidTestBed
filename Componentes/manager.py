@@ -53,4 +53,4 @@ class Manager:
       print( 'Something went wrong.' )
     
     "The adb connection is the container ip and the default port 5555"
-    db_mgr.insert_container( container_name, ip_ctnr+'5555', scenario_name, memory, network)
+    db_mgr.insert_container( container_name, ip_ctnr+':5555', scenario_name, memory, network)
