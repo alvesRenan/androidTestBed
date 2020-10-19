@@ -1,9 +1,9 @@
-import re
+from re import match
 from sys import exit
 
-from Componentes.controller import Controller
-from Componentes.db_manager import db_mgr
-from Componentes.manager import Manager
+from Components.controller import Controller
+from Components.db_manager import db_mgr
+from Components.manager import Manager
 from utils.string_menus import *
 
 
@@ -79,8 +79,8 @@ class ConfigMenu:
     self.options = {
       '0': self.return_to_menu,
       '1': self.add_client,
-      # '2': pass,
-      # '3': pass,
+      '2': self.add_server,
+      '3': self.list_all,
       # '4': pass,
       # '5': pass,
       # '6': pass,
@@ -113,19 +113,13 @@ class ConfigMenu:
   def add_client(self):
     container_name = input( 'Enter the container name: ' )
     
-    """Check if name is not empty, a single number o letter"""
-    if re.match( '[a-zA-Z0-9][a-zA-Z0-9_.-]', container_name ) is None:
-      print( 'Name not allowed!' )
-      return
-
-    """Check if a container with that name already exists"""
-    if db_mgr.container_exists( container_name ):
-      print( 'Container already exists!' )
+    "Validates the name first"
+    if not self.ctrl.validate_container_name( container_name ):
       return
     
     print( 'Available network configurations: umts, lte, full' )
     network = input( 'Entre the name of the network or define the value to be used in kbps (Ex: 620.0): ' )
-    if re.match('lte|umts|full|[0-9]', network) is None:
+    if match('lte|umts|full|[0-9]', network) is None:
       print( 'Network not supported! Using default network \'full\'' )
       network = 'full' 
 
@@ -138,7 +132,41 @@ class ConfigMenu:
       print("Invalid value, using default value.")
       memory = '512'
 
-    self.mgr.add_client( container_name, self.scenario_name, memory, network )
+    self.mgr.add_client( self.scenario_name, container_name, memory, network )
+  
+  def add_server(self):
+    container_name = input( 'Enter the container name: ' )
+    
+    "Validates the name first"
+    if not self.ctrl.validate_container_name( container_name ):
+      return
+    
+    print( 'Define the amount of memory the server or leave it empty to not limit.' )
+    memory = input( 'Amount of memory of the server in megabytes: ' )
+
+    try:
+      if int(memory):
+        """the docker api I'm using requires the memory value
+        and the unit, in this case m for megabytes
+        so, for example, 512m or 1024m"""
+        memory = memory + 'm'
+    except:
+      print( 'Invalid value, creating server with no memory limit.' )
+      memory = None
+
+    print( 'By default, there is no memory CPU utilization lmit.\nLimit the CPUs where the container can execute?' )
+    cpus = input( 'Example: \'0.7\' for 70% , 0.5 for 50% or empty to not limit: ') or None
+
+    bind_ports = input( 'Bind ports? (Y)es/(N)o (Making the port bind prevents more than one server container to be created): ')
+
+    if bind_ports.lower() == 'n':
+      self.mgr.add_server( self.scenario_name, container_name, memory, cpus, False)
+      print("After creating all the servers don't forget to create a Nginx container!")
+    else:
+      self.mgr.add_server( self.scenario_name, container_name, memory, cpus )
+  
+  def list_all(self):
+    self.ctrl.list_scneario_containers( self.scenario_name )
 
   def return_to_menu(self):
     raise FinishedExecution
